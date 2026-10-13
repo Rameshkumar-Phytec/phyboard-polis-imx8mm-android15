@@ -116,20 +116,50 @@ if [ -n "${PATCH_DIR}" ]; then
     echo -e "${BLUE}[INFO] PATCH_DIR        : ${BOLD}${PATCH_DIR}${NC}"
 fi
 
+# Locate or Setup AARCH64 Cross-Compiler Toolchain
+TOOLCHAIN_DIR_NAME="arm-gnu-toolchain-11.3.rel1-x86_64-aarch64-none-linux-gnu"
 TOOLCHAIN_BIN=""
+
+# 1. Check relative package or workspace directories
 for tc_candidate in \
-    "${REL_PACKAGE_DIR}/arm-gnu-toolchain-11.3.rel1-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-" \
-    "${WORKSPACE}/arm-gnu-toolchain-11.3.rel1-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-" \
-    "/home/ramesh/R_D_aNDROID/imx-android-15.0.0_1.2.0/arm-gnu-toolchain-11.3.rel1-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-"; do
+    "${REL_PACKAGE_DIR}/${TOOLCHAIN_DIR_NAME}/bin/aarch64-none-linux-gnu-" \
+    "${WORKSPACE}/${TOOLCHAIN_DIR_NAME}/bin/aarch64-none-linux-gnu-"; do
     if [ -f "${tc_candidate%aarch64-none-linux-gnu-}aarch64-none-linux-gnu-gcc" ]; then
         TOOLCHAIN_BIN="${tc_candidate}"
         break
     fi
 done
 
+# 2. Check if archive exists and extract if necessary
+if [ -z "${TOOLCHAIN_BIN}" ]; then
+    for tar_candidate in \
+        "${REL_PACKAGE_DIR}/${TOOLCHAIN_DIR_NAME}.tar.xz" \
+        "${WORKSPACE}/${TOOLCHAIN_DIR_NAME}.tar.xz"; do
+        if [ -f "${tar_candidate}" ]; then
+            echo -e "${BLUE}[INFO] Extracting cross-toolchain from $(basename "${tar_candidate}")...${NC}"
+            tar -xf "${tar_candidate}" -C "$(dirname "${tar_candidate}")"
+            TOOLCHAIN_BIN="$(dirname "${tar_candidate}")/${TOOLCHAIN_DIR_NAME}/bin/aarch64-none-linux-gnu-"
+            break
+        fi
+    done
+fi
+
+# 3. Check system PATH fallback
+if [ -z "${TOOLCHAIN_BIN}" ]; then
+    if command -v aarch64-none-linux-gnu-gcc >/dev/null 2>&1; then
+        SYS_TC="$(command -v aarch64-none-linux-gnu-gcc)"
+        TOOLCHAIN_BIN="${SYS_TC%gcc}"
+    elif command -v aarch64-linux-gnu-gcc >/dev/null 2>&1; then
+        SYS_TC="$(command -v aarch64-linux-gnu-gcc)"
+        TOOLCHAIN_BIN="${SYS_TC%gcc}"
+    fi
+fi
+
 if [ -n "${TOOLCHAIN_BIN}" ]; then
     export AARCH64_GCC_CROSS_COMPILE="${TOOLCHAIN_BIN}"
     echo -e "${GREEN}[INFO] Toolchain configured: ${AARCH64_GCC_CROSS_COMPILE}${NC}"
+else
+    echo -e "${YELLOW}[WARNING] AARCH64 GCC toolchain not found. Install gcc-aarch64-linux-gnu or place ${TOOLCHAIN_DIR_NAME}.${NC}"
 fi
 
 mkdir -p "$android_builddir"
