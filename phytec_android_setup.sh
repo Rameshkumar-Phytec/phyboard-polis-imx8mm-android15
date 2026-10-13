@@ -155,6 +155,27 @@ if [ -z "${TOOLCHAIN_BIN}" ]; then
     fi
 fi
 
+# 4. Automatically download and extract official Arm GNU Toolchain if still missing
+if [ -z "${TOOLCHAIN_BIN}" ]; then
+    echo -e "${BLUE}[INFO] Toolchain not found locally. Downloading official Arm GNU Toolchain 11.3.rel1...${NC}"
+    TC_URL="https://developer.arm.com/-/media/Files/downloads/gnu/11.3.rel1/binrel/arm-gnu-toolchain-11.3.rel1-x86_64-aarch64-none-linux-gnu.tar.xz"
+    TC_TAR="${WORKSPACE}/${TOOLCHAIN_DIR_NAME}.tar.xz"
+    
+    if command -v wget >/dev/null 2>&1; then
+        wget -c "${TC_URL}" -O "${TC_TAR}"
+    elif command -v curl >/dev/null 2>&1; then
+        curl -L "${TC_URL}" -o "${TC_TAR}"
+    fi
+
+    if [ -f "${TC_TAR}" ]; then
+        echo -e "${BLUE}[INFO] Extracting toolchain to ${WORKSPACE}...${NC}"
+        tar -xf "${TC_TAR}" -C "${WORKSPACE}"
+        if [ -f "${WORKSPACE}/${TOOLCHAIN_DIR_NAME}/bin/aarch64-none-linux-gnu-gcc" ]; then
+            TOOLCHAIN_BIN="${WORKSPACE}/${TOOLCHAIN_DIR_NAME}/bin/aarch64-none-linux-gnu-"
+        fi
+    fi
+fi
+
 if [ -n "${TOOLCHAIN_BIN}" ]; then
     export AARCH64_GCC_CROSS_COMPILE="${TOOLCHAIN_BIN}"
     echo -e "${GREEN}[INFO] Toolchain configured: ${AARCH64_GCC_CROSS_COMPILE}${NC}"

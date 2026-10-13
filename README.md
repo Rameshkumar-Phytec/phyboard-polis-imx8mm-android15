@@ -88,20 +88,50 @@
 ## 4. Quick Start: Setting Up the BSP
 
 ### Prerequisites
-- Ubuntu 22.04 LTS x86_64 host
-- Google `repo` tool installed
-- At least 300 GB free disk space
+- **Host OS:** Ubuntu 22.04 LTS (x86_64)
+- **Disk Space:** At least 300 GB free disk space
+- **Google `repo` Tool:**
+  ```bash
+  mkdir -p ~/bin
+  curl https://storage.googleapis.com/git-repo-downloads/repo > ~/bin/repo
+  chmod a+x ~/bin/repo
+  export PATH=${PATH}:~/bin
+  ```
 
-### Step 1: Clone this Repository
+- **Required Host Packages:**
+  ```bash
+  sudo apt update
+  sudo apt install -y git-core gnupg flex bison build-essential zip curl zlib1g-dev \
+      libc6-dev-i386 libncurses5 x11proto-core-dev libx11-dev lib32z1-dev libgl1-mesa-dev \
+      libxml2-utils xsltproc unzip fontconfig libssl-dev bc rsync libyaml-dev gcc-aarch64-linux-gnu
+  ```
+
+---
+
+### Cross-Compiler Toolchain (ARM64)
+U-Boot and ATF compilation require the **Arm GNU Toolchain 11.3.rel1** (`aarch64-none-linux-gnu-`):
+* **Automatic:** `phytec_android_setup.sh` automatically detects or downloads and extracts the toolchain from the official Arm Developer CDN if missing.
+* **Manual Link (for reference):**
+  ```bash
+  wget https://developer.arm.com/-/media/Files/downloads/gnu/11.3.rel1/binrel/arm-gnu-toolchain-11.3.rel1-x86_64-aarch64-none-linux-gnu.tar.xz
+  tar -xf arm-gnu-toolchain-11.3.rel1-x86_64-aarch64-none-linux-gnu.tar.xz
+  ```
+
+---
+
+### Step-by-Step Setup Procedure
+
+#### Step 1: Clone this Repository
 ```bash
 git clone git@github.com:Rameshkumar-Phytec/phyboard-polis-imx8mm-android15.git
 cd phyboard-polis-imx8mm-android15
 ```
 
-### Step 2: Run the Setup Script
+#### Step 2: Run the Automated Setup Script
 ```bash
 # This fetches NXP Android 15.0.0_1.2.0, installs proprietary vendor blobs,
-# creates dedicated PHYTEC branches, and applies all patch stacks automatically.
+# auto-configures the cross-toolchain, creates dedicated PHYTEC branches,
+# and applies all 18 patch stacks cleanly.
 source ./phytec_android_setup.sh
 ```
 
@@ -113,6 +143,7 @@ From inside the generated `android_build/` directory:
 
 ### 1. Initialize Android Build Environment
 ```bash
+cd android_build
 source build/envsetup.sh
 ```
 
