@@ -51,7 +51,7 @@
 
 ```
 .
-├── phytec_android_setup.sh     # Industrial 1-click BSP setup & patch automation script
+├── phytec_phyboard_polis_android_setup.sh     # Industrial 1-click BSP setup & patch automation script
 ├── patches/
 │   ├── uboot_patches/          # 5 Production-grade atomic commits for U-Boot 2024.04
 │   │   ├── 0001-board-phytec-phycore_imx8mm-Add-2GB-LPDDR4-timings-a.patch
@@ -110,7 +110,7 @@
 
 ### Cross-Compiler Toolchain (ARM64)
 U-Boot and ATF compilation require the **Arm GNU Toolchain 11.3.rel1** (`aarch64-none-linux-gnu-`):
-* **Automatic:** `phytec_android_setup.sh` automatically detects or downloads and extracts the toolchain from the official Arm Developer CDN if missing.
+* **Automatic:** `phytec_phyboard_polis_android_setup.sh` automatically detects or downloads and extracts the toolchain from the official Arm Developer CDN if missing.
 * **Manual Link (for reference):**
   ```bash
   wget https://developer.arm.com/-/media/Files/downloads/gnu/11.3.rel1/binrel/arm-gnu-toolchain-11.3.rel1-x86_64-aarch64-none-linux-gnu.tar.xz
@@ -132,7 +132,7 @@ cd phyboard-polis-imx8mm-android15
 # This fetches NXP Android 15.0.0_1.2.0, installs proprietary vendor blobs,
 # auto-configures the cross-toolchain, creates dedicated PHYTEC branches,
 # and applies all 18 patch stacks cleanly.
-source ./phytec_android_setup.sh
+source ./phytec_phyboard_polis_android_setup.sh
 ```
 
 ---

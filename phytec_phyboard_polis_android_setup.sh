@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # ==============================================================================
 # PHYTEC Embedded Pvt. Ltd. (India)
-# Script: phytec_android_setup.sh
+# Script: phytec_phyboard_polis_android_setup.sh
 # Target: PHYTEC phyBOARD-Polis i.MX8M Mini (PCM-066 / PCL-069 SOM, 2GB LPDDR4)
 # Release: Android 15.0.0_1.2.0 (Linux Kernel 6.6.58 GKI)
 # Author: T S Rameshkumar <rameshkumar.t@phytecembedded.in>
