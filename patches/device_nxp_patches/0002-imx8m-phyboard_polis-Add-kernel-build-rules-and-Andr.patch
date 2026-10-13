@@ -1,0 +1,54 @@
+From 4bd749e88b38b1f18e2374948ea43d1f6e4bc1a2 Mon Sep 17 00:00:00 2001
+From: T S Rameshkumar <rameshkumar.t@phytecembedded.in>
+Date: Fri, 9 Oct 2026 18:42:03 +0530
+Subject: [PATCH 2/7] imx8m: phyboard_polis: Add kernel build rules and Android
+ defconfig addition
+
+Add android_addition_defconfig and update kernel build rules for phyBOARD-Polis i.MX8MM.
+---
+ common/build/kernel.mk                        |  2 +-
+ .../phyboard_polis/android_addition_defconfig | 19 +++++++++++++++++++
+ 2 files changed, 20 insertions(+), 1 deletion(-)
+ create mode 100644 imx8m/phyboard_polis/android_addition_defconfig
+
+diff --git a/common/build/kernel.mk b/common/build/kernel.mk
+index e795a592..9ec7db43 100644
+--- a/common/build/kernel.mk
++++ b/common/build/kernel.mk
+@@ -54,7 +54,7 @@ TARGET_KERNEL_SRC := $(KERNEL_IMX_PATH)/kernel_imx
+ CLANG_TO_COMPILE := LLVM=1
+ 
+ # Uncomment below line to use prebuilt clang tool in android platform code
+-#CLANG_PATH := $(realpath prebuilts/clang/host/linux-x86)
++CLANG_PATH := $(realpath prebuilts/clang/host/linux-x86)
+ 
+ # Or use external clang
+ ifeq ($(CLANG_PATH),)
+diff --git a/imx8m/phyboard_polis/android_addition_defconfig b/imx8m/phyboard_polis/android_addition_defconfig
+new file mode 100644
+index 00000000..72f692b4
+--- /dev/null
++++ b/imx8m/phyboard_polis/android_addition_defconfig
+@@ -0,0 +1,19 @@
++CONFIG_DRM_MXSFB=m
++CONFIG_DWMAC_IMX8=m
++CONFIG_MXC_VIDEO_WAVE6=m
++CONFIG_VIDEO_AMPHION_VPU=m
++CONFIG_DRM_IMX_DCNANO=m
++# CONFIG_HAVE_IMX_RPMSG is not set
++CONFIG_DRM_IMX95_DPU=m
++CONFIG_DRM_IMX_DCSS=m
++CONFIG_OPTEE=m
++CONFIG_FEC_UIO=m
++CONFIG_IMX_LCDIFV3_CORE=m
++CONFIG_IMX_DPU_CORE=m
++CONFIG_DRM_NWL_MIPI_DSI=m
++CONFIG_IMX8_DPRC=m
++CONFIG_IMX_IRQSTEER=m
++CONFIG_DRM_CDNS_MHDP=m
++CONFIG_DRM_IMX_CDNS_MHDP=m
++CONFIG_FB_MXC_EINK_V2_PANEL=m
++CONFIG_DRM_IMX_RPMSG=m
+-- 
+2.34.1
+

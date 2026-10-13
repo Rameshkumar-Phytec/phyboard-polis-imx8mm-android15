@@ -1,0 +1,125 @@
+From 7738a1c09558de9e7b34b99996c0d80de4f386ae Mon Sep 17 00:00:00 2001
+From: T S Rameshkumar <rameshkumar.t@phytecembedded.in>
+Date: Tue, 13 Oct 2026 18:01:12 +0530
+Subject: [PATCH 7/7] imx8m: phyboard_polis: Add standalone bootimage,
+ dtboimage rules and kernel versioning
+
+Add standalone make rules for building signed boot.img and dtbo-imx8mm.img
+without requiring a full Android platform build. Configure kernel localversion
+to match PHYTEC Android 15 release string.
+
+Signed-off-by: T S Rameshkumar <rameshkumar.t@phytecembedded.in>
+---
+ common/build/kernel.mk                        | 32 ++++++++++++++++++-
+ common/tools/imx-make.sh                      | 14 ++++----
+ .../phyboard_polis/android_addition_defconfig |  2 ++
+ 3 files changed, 39 insertions(+), 9 deletions(-)
+
+diff --git a/common/build/kernel.mk b/common/build/kernel.mk
+index 9ec7db43..79d49667 100644
+--- a/common/build/kernel.mk
++++ b/common/build/kernel.mk
+@@ -167,7 +167,7 @@ $(KERNEL_CONFIG_REQUIRED): $(KERNEL_CONFIG_REQUIRED_SRC) | $(KERNEL_OUT)
+ 	$(hide) cat $^ > $@
+ 
+ # use deferred expansion
+-kernel_build_shell_env = KBUILD_SYMTYPES=1 PATH=$(CLANG_BIN):$(realpath prebuilts/misc/linux-x86/lz4):$${PATH} \
++kernel_build_shell_env = LOCALVERSION="" KBUILD_SYMTYPES=1 PATH=$(CLANG_BIN):$(realpath prebuilts/misc/linux-x86/lz4):$${PATH} \
+         $(CLANG_TRIPLE) CCACHE_NODIRECT="true"
+ ifeq ($(CLANG_TO_COMPILE),)
+ kernel_build_common_env = ARCH=$(KERNEL_ARCH) CROSS_COMPILE=$(strip $(KERNEL_CROSS_COMPILE_WRAPPER)) \
+@@ -242,3 +242,33 @@ BOARD_GPU_DRIVERS := vivante
+ 
+ $(PRODUCT_OUT)/kernel: $(KERNEL_IMAGE) $(KERNEL_DEPS)
+ 	$(hide)cp -fp $< $@
++
++$(PRODUCT_OUT)/boot.img: $(PRODUCT_OUT)/kernel
++	$(hide)echo "Building boot.img using mkbootimg..."
++	$(hide)python3 system/tools/mkbootimg/mkbootimg.py \
++		--kernel $(PRODUCT_OUT)/kernel \
++		--header_version 4 \
++		--os_version 15 \
++		--os_patch_level 2025-02-05 \
++		-o $@
++	$(hide)python3 external/avb/avbtool.py add_hash_footer \
++		--image $@ \
++		--partition_size 67108864 \
++		--partition_name boot \
++		--algorithm SHA256_RSA4096 \
++		--key external/avb/test/data/testkey_rsa4096.pem
++	$(hide)echo "Done: $@"
++
++bootimage: $(PRODUCT_OUT)/boot.img
++
++$(PRODUCT_OUT)/dtbo-imx8mm.img: KERNEL_DTB
++	$(hide)echo "Building dtbo-imx8mm.img..."
++	$(hide)python3 system/libufdt/utils/src/mkdtboimg.py create $@ --page_size=4096 \
++		$(KERNEL_OUT)/arch/arm64/boot/dts/freescale/imx8mm-phyboard-polis-rdk.dtb
++	$(hide)python3 external/avb/avbtool.py add_hash_footer \
++		--image $@ \
++		--partition_name dtbo \
++		--partition_size 4194304
++	$(hide)echo "Done: $@"
++
++dtboimage: $(PRODUCT_OUT)/dtbo-imx8mm.img
+diff --git a/common/tools/imx-make.sh b/common/tools/imx-make.sh
+index f0a0d137..e9fae159 100755
+--- a/common/tools/imx-make.sh
++++ b/common/tools/imx-make.sh
+@@ -99,16 +99,14 @@ for arg in ${args[*]} ; do
+                     build_vvcam="vvcam";;
+         mxmwifi) build_kernel_oot_module_flag=1
+                     build_mxmwifi="mxmwifi";;
+-        bootimage) build_android_flag=1;
+-                    build_kernel="${OUT}/kernel";
++        bootimage) build_kernel="${OUT}/kernel";
+                     build_bootimage="bootimage";;
+         vendorbootimage) build_android_flag=1;
+                     build_kernel_oot_module_flag=1;
+                     build_kernel_dts="KERNEL_DTB";
+                     build_kernel_modules="KERNEL_MODULES";
+                     build_vendorbootimage="vendorbootimage";;
+-        dtboimage) build_android_flag=1;
+-                    build_kernel_dts="KERNEL_DTB";
++        dtboimage) build_kernel_dts="KERNEL_DTB";
+                     build_dtboimage="dtboimage";;
+         vendor_dlkmimage) build_android_flag=1;
+                     build_kernel_oot_module_flag=1;
+@@ -162,9 +160,9 @@ fi
+ # redirect standard input to /dev/null to avoid manually input in kernel configuration stage
+ soc_path=${soc_path} product_path=${product_path} nxp_git_path=${nxp_git_path} clean_build=${clean_build} \
+     make -C ./ -f ${nxp_git_path}/common/build/Makefile ${parallel_option} \
+-    ${build_bootloader} ${build_kernel} </dev/null || exit
++    ${build_bootloader} ${build_kernel} ${build_bootimage} </dev/null || exit
+ # in the execution of this script, if the kernel build env is cleaned or configured, do not trigger that again
+-if [ -n "${build_kernel}" ]; then
++if [ -n "${build_kernel}" ] || [ -n "${build_bootimage}" ]; then
+     skip_config_or_clean=1
+ fi
+ 
+@@ -176,10 +174,10 @@ if [ -n "${build_kernel_modules}" ]; then
+     skip_config_or_clean=1
+ fi
+ 
+-if [ -n "${build_kernel_dts}" ]; then
++if [ -n "${build_kernel_dts}" ] || [ -n "${build_dtboimage}" ]; then
+     soc_path=${soc_path} product_path=${product_path} nxp_git_path=${nxp_git_path} clean_build=${clean_build} \
+         skip_config_or_clean=${skip_config_or_clean} make -C ./ -f ${nxp_git_path}/common/build/Makefile ${parallel_option} \
+-        ${build_kernel_dts} </dev/null || exit
++        ${build_kernel_dts} ${build_dtboimage} </dev/null || exit
+     skip_config_or_clean=1
+ fi
+ 
+diff --git a/imx8m/phyboard_polis/android_addition_defconfig b/imx8m/phyboard_polis/android_addition_defconfig
+index 72f692b4..3528673d 100644
+--- a/imx8m/phyboard_polis/android_addition_defconfig
++++ b/imx8m/phyboard_polis/android_addition_defconfig
+@@ -17,3 +17,5 @@ CONFIG_DRM_CDNS_MHDP=m
+ CONFIG_DRM_IMX_CDNS_MHDP=m
+ CONFIG_FB_MXC_EINK_V2_PANEL=m
+ CONFIG_DRM_IMX_RPMSG=m
++CONFIG_LOCALVERSION="-g758ad1ac4e8e-PHYTEC-Android15"
++# CONFIG_LOCALVERSION_AUTO is not set
+-- 
+2.34.1
+

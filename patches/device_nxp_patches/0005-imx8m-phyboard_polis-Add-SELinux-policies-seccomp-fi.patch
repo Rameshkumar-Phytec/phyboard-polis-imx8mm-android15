@@ -1,0 +1,287 @@
+From d912720cdf8ef2e1c6a3f7d7fad30b43efc22706 Mon Sep 17 00:00:00 2001
+From: T S Rameshkumar <rameshkumar.t@phytecembedded.in>
+Date: Fri, 9 Oct 2026 18:42:59 +0530
+Subject: [PATCH 5/7] imx8m: phyboard_polis: Add SELinux policies, seccomp
+ filters, and VINTF manifests
+
+Add board-specific sepolicy (file_contexts, genfs_contexts), seccomp policy files, app whitelist, and VINTF device manifests.
+---
+ imx8m/phyboard_polis/app_whitelist.xml        | 36 +++++++++++++
+ imx8m/phyboard_polis/compatibility_matrix.xml |  6 +++
+ .../device_framework_matrix.xml               | 18 +++++++
+ imx8m/phyboard_polis/manifest.xml             | 50 +++++++++++++++++++
+ imx8m/phyboard_polis/required_hardware.xml    | 36 +++++++++++++
+ .../seccomp/mediacodec-seccomp.policy         |  1 +
+ .../seccomp/mediaextractor-seccomp.policy     |  5 ++
+ imx8m/phyboard_polis/sepolicy/file_contexts   | 32 ++++++++++++
+ imx8m/phyboard_polis/sepolicy/genfs_contexts  | 18 +++++++
+ 9 files changed, 202 insertions(+)
+ create mode 100644 imx8m/phyboard_polis/app_whitelist.xml
+ create mode 100644 imx8m/phyboard_polis/compatibility_matrix.xml
+ create mode 100644 imx8m/phyboard_polis/device_framework_matrix.xml
+ create mode 100644 imx8m/phyboard_polis/manifest.xml
+ create mode 100644 imx8m/phyboard_polis/required_hardware.xml
+ create mode 100644 imx8m/phyboard_polis/seccomp/mediacodec-seccomp.policy
+ create mode 100644 imx8m/phyboard_polis/seccomp/mediaextractor-seccomp.policy
+ create mode 100644 imx8m/phyboard_polis/sepolicy/file_contexts
+ create mode 100644 imx8m/phyboard_polis/sepolicy/genfs_contexts
+
+diff --git a/imx8m/phyboard_polis/app_whitelist.xml b/imx8m/phyboard_polis/app_whitelist.xml
+new file mode 100644
+index 00000000..0084b334
+--- /dev/null
++++ b/imx8m/phyboard_polis/app_whitelist.xml
+@@ -0,0 +1,36 @@
++<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
++
++<!--
++/* Copyright (c) 2017, The Linux Foundation. All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions are
++ * met:
++ *     * Redistributions of source code must retain the above copyright
++ *       notice, this list of conditions and the following disclaimer.
++ *     * Redistributions in binary form must reproduce the above
++ *       copyright notice, this list of conditions and the following
++ *       disclaimer in the documentation and/or other materials provided
++ *       with the distribution.
++ *     * Neither the name of The Linux Foundation nor the names of its
++ *       contributors may be used to endorse or promote products derived
++ *       from this software without specific prior written permission.
++ *
++ * THIS SOFTWARE IS PROVIDED "AS IS" AND ANY EXPRESS OR IMPLIED
++ * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
++ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT
++ * ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS
++ * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
++ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
++ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
++ * BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
++ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
++ * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
++ * IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
++ */
++-->
++
++<config>
++    <!-- deskclock need to freely run in the background -->
++    <allow-in-power-save package="com.android.deskclock" />
++</config>
+diff --git a/imx8m/phyboard_polis/compatibility_matrix.xml b/imx8m/phyboard_polis/compatibility_matrix.xml
+new file mode 100644
+index 00000000..de8d9c31
+--- /dev/null
++++ b/imx8m/phyboard_polis/compatibility_matrix.xml
+@@ -0,0 +1,6 @@
++<compatibility-matrix version="1.0" type="device">
++    <hal format="native" optional="false">
++        <name>netutils-wrapper</name>
++        <version>1.0</version>
++    </hal>
++</compatibility-matrix>
+diff --git a/imx8m/phyboard_polis/device_framework_matrix.xml b/imx8m/phyboard_polis/device_framework_matrix.xml
+new file mode 100644
+index 00000000..2ef0f9a9
+--- /dev/null
++++ b/imx8m/phyboard_polis/device_framework_matrix.xml
+@@ -0,0 +1,18 @@
++<compatibility-matrix version="1.0" type="framework">
++    <hal format="aidl" optional="true">
++        <name>nxp.hardware.secureime</name>
++        <version>1</version>
++        <interface>
++            <name>ISecureIME</name>
++            <instance>default</instance>
++        </interface>
++    </hal>
++    <hal format="aidl" optional="true">
++        <name>nxp.hardware.imx_dek_extractor</name>
++        <version>1</version>
++        <interface>
++            <name>IDek_Extractor</name>
++            <instance>default</instance>
++        </interface>
++    </hal>
++</compatibility-matrix>
+diff --git a/imx8m/phyboard_polis/manifest.xml b/imx8m/phyboard_polis/manifest.xml
+new file mode 100644
+index 00000000..92fde967
+--- /dev/null
++++ b/imx8m/phyboard_polis/manifest.xml
+@@ -0,0 +1,50 @@
++<manifest version="1.0" type="device" target-level="202404">
++    <hal format="aidl">
++        <name>android.hardware.gatekeeper</name>
++        <version>1</version>
++        <interface>
++            <name>IGatekeeper</name>
++            <instance>default</instance>
++        </interface>
++    </hal>
++    <hal format="aidl">
++        <name>android.hardware.media.c2</name>
++        <version>1</version>
++        <fqname>IComponentStore/default</fqname>
++    </hal>
++    <hal format="aidl">
++        <name>android.hardware.camera.provider</name>
++        <version>1</version>
++        <interface>
++            <name>ICameraProvider</name>
++            <instance>external/0</instance>
++        </interface>
++    </hal>
++    <hal format="aidl">
++       <name>android.hardware.security.keymint</name>
++       <version>3</version>
++       <fqname>IKeyMintDevice/default</fqname>
++    </hal>
++    <hal format="aidl">
++       <name>android.hardware.security.keymint</name>
++       <version>3</version>
++       <fqname>IRemotelyProvisionedComponent/default</fqname>
++    </hal>
++    <hal format="aidl">
++       <name>android.hardware.security.secureclock</name>
++       <fqname>ISecureClock/default</fqname>
++    </hal>
++    <hal format="aidl">
++       <name>android.hardware.security.sharedsecret</name>
++       <fqname>ISharedSecret/default</fqname>
++    </hal>
++    <hal format="aidl">
++       <name>android.hardware.oemlock</name>
++       <fqname>IOemLock/default</fqname>
++    </hal>
++    <hal format="aidl">
++       <name>android.hardware.security.secretkeeper</name>
++       <version>1</version>
++       <fqname>ISecretkeeper/default</fqname>
++    </hal>
++</manifest>
+diff --git a/imx8m/phyboard_polis/required_hardware.xml b/imx8m/phyboard_polis/required_hardware.xml
+new file mode 100644
+index 00000000..e201fea0
+--- /dev/null
++++ b/imx8m/phyboard_polis/required_hardware.xml
+@@ -0,0 +1,36 @@
++<?xml version="1.0" encoding="utf-8"?>
++<!-- Copyright (C) 2009 The Android Open Source Project
++     Copyright 2018 NXP
++
++     Licensed under the Apache License, Version 2.0 (the "License");
++     you may not use this file except in compliance with the License.
++     You may obtain a copy of the License at
++
++          http://www.apache.org/licenses/LICENSE-2.0
++
++     Unless required by applicable law or agreed to in writing, software
++     distributed under the License is distributed on an "AS IS" BASIS,
++     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++     See the License for the specific language governing permissions and
++     limitations under the License.
++-->
++
++<!-- These are the hardware components that are included in i.MX reference board
++-->
++<permissions>
++    <!-- This is Android and fully CTS compatible.  Basically this is for CTS tests to use. -->
++    <feature name="android.software.cts" />
++    <feature name="android.hardware.microphone" />
++    <feature name="android.hardware.camera.any" />
++    <feature name="android.software.cant_save_state" />
++    <feature name="android.software.home_screen" />
++    <feature name="android.software.input_methods" />
++    <feature name="android.hardware.location" />
++    <feature name="android.hardware.location.network" />
++    <feature name="android.hardware.bluetooth" />
++    <feature name="android.software.companion_device_setup" />
++    <feature name="android.software.autofill" />
++    <feature name="android.software.secure_lock_screen" />
++    <feature name="android.hardware.keystore.app_attest_key" />
++    <feature name="android.hardware.security.model.compatible" />
++</permissions>
+diff --git a/imx8m/phyboard_polis/seccomp/mediacodec-seccomp.policy b/imx8m/phyboard_polis/seccomp/mediacodec-seccomp.policy
+new file mode 100644
+index 00000000..9bac41bf
+--- /dev/null
++++ b/imx8m/phyboard_polis/seccomp/mediacodec-seccomp.policy
+@@ -0,0 +1 @@
++select: 1
+diff --git a/imx8m/phyboard_polis/seccomp/mediaextractor-seccomp.policy b/imx8m/phyboard_polis/seccomp/mediaextractor-seccomp.policy
+new file mode 100644
+index 00000000..abbef2c2
+--- /dev/null
++++ b/imx8m/phyboard_polis/seccomp/mediaextractor-seccomp.policy
+@@ -0,0 +1,5 @@
++uname: 1
++fchmodat: 1
++ftruncate64: 1
++readlinkat: 1
++pread64: 1
+diff --git a/imx8m/phyboard_polis/sepolicy/file_contexts b/imx8m/phyboard_polis/sepolicy/file_contexts
+new file mode 100644
+index 00000000..a5bf5bd3
+--- /dev/null
++++ b/imx8m/phyboard_polis/sepolicy/file_contexts
+@@ -0,0 +1,32 @@
++/dev/block/mmcblk2boot0                      u:object_r:emmc_boot0:s0
++/dev/block/mmcblk1                           u:object_r:sdcard:s0
++
++#peripheral
++/dev/ttymxc[0-9]*               u:object_r:tty_device:s0
++/dev/sda[0-8]*                  u:object_r:fuse:s0
++
++#Thermal HAL service
++/vendor/bin/hw/android\.hardware\.thermal@2\.0-service.imx         u:object_r:hal_thermal_default_exec:s0
++/vendor/bin/hw/android\.hardware\.thermal-service\.imx             u:object_r:hal_thermal_default_exec:s0
++
++/vendor/bin/hw/android\.hardware\.media\.c2\.service\.imx    u:object_r:mediacodec_exec:s0
++
++/dev/block/pmem0  u:object_r:rebootescrow_device:s0
++
++#Bluetootn HAL service
++/vendor/bin/hw/android\.hardware\.bluetooth-service.default.nxp            u:object_r:hal_bluetooth_default_exec:s0
++
++# android.system.suspend@1.0-service
++/sys/devices/platform/soc@0/30000000.bus/30370000.snvs/30370000.snvs:snvs-powerkey/wakeup                                                     u:object_r:sysfs_wakeup:s0
++/sys/devices/platform/soc@0/30000000.bus/30370000.snvs/30370000.snvs:snvs-powerkey/wakeup/wakeup[0-9]*(/.*)?                                  u:object_r:sysfs_wakeup:s0
++/sys/devices/platform/soc@0/30000000.bus/30370000.snvs/30370000.snvs:snvs-rtc-lp/wakeup                                                       u:object_r:sysfs_wakeup:s0
++/sys/devices/platform/soc@0/30000000.bus/30370000.snvs/30370000.snvs:snvs-rtc-lp/wakeup/wakeup[0-9]*(/.*)?                                    u:object_r:sysfs_wakeup:s0
++/sys/devices/platform/soc@0/30000000.bus/30370000.snvs/30370000.snvs:snvs-rtc-lp/rtc/rtc0/alarmtimer.[0-9].auto/wakeup                        u:object_r:sysfs_wakeup:s0
++/sys/devices/platform/soc@0/30000000.bus/30370000.snvs/30370000.snvs:snvs-rtc-lp/rtc/rtc0/alarmtimer.[0-9].auto/wakeup/wakeup[0-9]*(/.*)?     u:object_r:sysfs_wakeup:s0
++/sys/devices/virtual/power_supply/battery/wakeup[0-9]*(/.*)?                                                                                  u:object_r:sysfs_wakeup:s0
++/sys/devices/virtual/power_supply/usb/wakeup[0-9]*(/.*)?                                                                                      u:object_r:sysfs_wakeup:s0
++/sys/devices/virtual/wakeup/wakeup[0-9]*(/.*)?                                                                                                u:object_r:sysfs_wakeup:s0
++/sys/devices/platform/soc@0/30800000.bus/30a30000.i2c/i2c-1/1-0050/power_supply/tcpm-source-psy-1-0050/wakeup[0-9]*(/.*)?                     u:object_r:sysfs_wakeup:s0
++/sys/devices/platform/soc@0/30800000.bus/30be0000.ethernet/net/eth0/wakeup[0-9]*(/.*)?                                                        u:object_r:sysfs_wakeup:s0
++/sys/devices/platform/soc@0/30800000.bus/30b40000.mmc/mmc_host/mmc0/mmc0:0001/mmc0:0001:1/wakeup                                              u:object_r:sysfs_wakeup:s0
++/sys/devices/platform/soc@0/30800000.bus/30b40000.mmc/mmc_host/mmc0/mmc0:0001/mmc0:0001:1/wakeup/wakeup[0-9]*(/.*)?                           u:object_r:sysfs_wakeup:s0
+diff --git a/imx8m/phyboard_polis/sepolicy/genfs_contexts b/imx8m/phyboard_polis/sepolicy/genfs_contexts
+new file mode 100644
+index 00000000..49d40b87
+--- /dev/null
++++ b/imx8m/phyboard_polis/sepolicy/genfs_contexts
+@@ -0,0 +1,18 @@
++genfscon sysfs /devices/platform/soc@0/30800000.bus/30a30000.i2c/i2c-1/1-0050/power_supply u:object_r:sysfs_batteryinfo:s0
++genfscon sysfs /devices/platform/soc@0/30800000.bus/30a30000.i2c/i2c-1/1-0050/extcon   u:object_r:sysfs_extcon:s0
++genfscon sysfs /devices/platform/soc@0/30000000.bus/30370000.snvs/30370000.snvs:snvs-rtc-lp/rtc/rtc0/hctosys     u:object_r:sysfs_rtc:s0
++
++genfscon sysfs /devices/platform/soc@0/30800000.bus/30b50000.mmc/mmc_host/mmc1/mmc1:aaaa/block/mmcblk1 u:object_r:sysfs_block_devices:s0
++
++genfscon sysfs /devices/platform/soc@0/30800000.bus/30b60000.mmc/mmc_host/mmc2/mmc2:0001/block/mmcblk2 u:object_r:sysfs_block_devices:s0
++genfscon sysfs /devices/platform/soc@0/30800000.bus/30bb0000.spi/spi_master/spi3/spi3.0/mtd/mtd0/mtdblock0        u:object_r:sysfs_block_devices:s0
++
++genfscon sysfs /devices/platform/soc@0/33002000.nand-controller/mtd/mtd0/mtdblock0/                                     u:object_r:sysfs_block_devices:s0
++
++#sys/class/net
++genfscon sysfs /devices/platform/soc@0/30800000.bus/30be0000.ethernet/net                                u:object_r:sysfs_net:s0
++genfscon sysfs /devices/platform/soc@0/30800000.bus/30b40000.mmc/mmc_host/mmc0/mmc0:0001/mmc0:0001:1/net u:object_r:sysfs_net:s0
++genfscon sysfs /devices/platform/soc@0/30800000.bus/30b50000.mmc/mmc_host/mmc1/mmc1:0001/mmc1:0001:1/net u:object_r:sysfs_net:s0
++
++# for dumpstate to access the stat file
++genfscon sysfs /devices/platform/b8500000.pmem/ndbus0/region0/namespace0.0/block/pmem0                                            u:object_r:sysfs_block_devices:s0
+-- 
+2.34.1
+

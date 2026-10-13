@@ -1,0 +1,451 @@
+From 9a15a0bfb5622d2ce752bfadf20c752af62b12b8 Mon Sep 17 00:00:00 2001
+From: T S Rameshkumar <rameshkumar.t@phytecembedded.in>
+Date: Mon, 12 Oct 2026 11:08:07 +0530
+Subject: [PATCH 1/5] board: phytec: phycore_imx8mm: Add 2GB LPDDR4 timings and
+ board initialization
+
+---
+ board/phytec/phycore_imx8mm/Kconfig           |  30 ++++
+ .../phycore_imx8mm/imximage-8mm-fspi.cfg      |   7 +
+ board/phytec/phycore_imx8mm/lpddr4_timing.c   |  25 +++
+ board/phytec/phycore_imx8mm/lpddr4_timing.h   |  13 ++
+ board/phytec/phycore_imx8mm/phycore-imx8mm.c  | 156 ++++++++++++++++++
+ .../phytec/phycore_imx8mm/phycore_imx8mm.env  | 123 ++++++++++++++
+ 6 files changed, 354 insertions(+)
+ create mode 100644 board/phytec/phycore_imx8mm/imximage-8mm-fspi.cfg
+ create mode 100644 board/phytec/phycore_imx8mm/lpddr4_timing.h
+ create mode 100644 board/phytec/phycore_imx8mm/phycore_imx8mm.env
+
+diff --git a/board/phytec/phycore_imx8mm/Kconfig b/board/phytec/phycore_imx8mm/Kconfig
+index 25e4bf2f836..8c30efc14eb 100644
+--- a/board/phytec/phycore_imx8mm/Kconfig
++++ b/board/phytec/phycore_imx8mm/Kconfig
+@@ -12,4 +12,34 @@ config SYS_CONFIG_NAME
+ config IMX_CONFIG
+ 	default "board/phytec/phycore_imx8mm/imximage-8mm-sd.cfg"
+ 
++config PHYCORE_IMX8MM_RAM_SIZE_FIX
++	bool "Set phyCORE-i.MX8MM RAM size fix instead of detecting"
++	default false
++	help
++	  RAM size is automatic being detected with the help of
++	  the EEPROM introspection data. Set RAM size to a fix value
++	  instead.
++
++choice
++	prompt "phyCORE-i.MX8MM RAM size"
++	depends on PHYCORE_IMX8MM_RAM_SIZE_FIX
++	default PHYCORE_IMX8MM_RAM_SIZE_2GB
++
++config PHYCORE_IMX8MM_RAM_SIZE_1GB
++	bool "1GB RAM"
++	help
++	  Set RAM size fix to 1GB for phyCORE-i.MX8MM.
++
++config PHYCORE_IMX8MM_RAM_SIZE_2GB
++	bool "2GB RAM"
++	help
++	  Set RAM size fix to 2GB for phyCORE-i.MX8MM.
++
++config PHYCORE_IMX8MM_RAM_SIZE_4GB
++	bool "4GB RAM"
++	help
++	  Set RAM size fix to 4GB for phyCORE-i.MX8MM.
++endchoice
++
++source "board/phytec/common/Kconfig"
+ endif
+diff --git a/board/phytec/phycore_imx8mm/imximage-8mm-fspi.cfg b/board/phytec/phycore_imx8mm/imximage-8mm-fspi.cfg
+new file mode 100644
+index 00000000000..f7865fa5909
+--- /dev/null
++++ b/board/phytec/phycore_imx8mm/imximage-8mm-fspi.cfg
+@@ -0,0 +1,7 @@
++/* SPDX-License-Identifier: GPL-2.0+ */
++/*
++ * Copyright 2023 Phytec Messtechnik GmbH
++ */
++
++BOOT_FROM	fspi
++LOADER		u-boot-spl-ddr.bin	0x7E2000
+diff --git a/board/phytec/phycore_imx8mm/lpddr4_timing.c b/board/phytec/phycore_imx8mm/lpddr4_timing.c
+index f5a2f3268b3..73e35c7c3b9 100644
+--- a/board/phytec/phycore_imx8mm/lpddr4_timing.c
++++ b/board/phytec/phycore_imx8mm/lpddr4_timing.c
+@@ -1842,3 +1842,28 @@ struct dram_timing_info dram_timing = {
+ 	.ddrphy_pie_num = ARRAY_SIZE(ddr_phy_pie),
+ 	.fsp_table = { 3000, 400, 100,},
+ };
++
++void set_dram_timings_1gb(void)
++{
++	dram_timing.ddrc_cfg[5].val = 0x2d0087;
++	dram_timing.ddrc_cfg[21].val = 0x8d;
++	dram_timing.ddrc_cfg[42].val = 0xf070707;
++	dram_timing.ddrc_cfg[58].val = 0x60012;
++	dram_timing.ddrc_cfg[73].val = 0x13;
++	dram_timing.ddrc_cfg[83].val = 0x30005;
++	dram_timing.ddrc_cfg[98].val = 0x5;
++}
++
++void set_dram_timings_4gb(void)
++{
++	dram_timing.ddrc_cfg[2].val = 0xa3080020;
++	dram_timing.ddrc_cfg[37].val = 0x17;
++	dram_timing.fsp_msg[0].fsp_cfg[8].val = 0x310;
++	dram_timing.fsp_msg[0].fsp_cfg[20].val = 0x3;
++	dram_timing.fsp_msg[1].fsp_cfg[9].val = 0x310;
++	dram_timing.fsp_msg[1].fsp_cfg[21].val = 0x3;
++	dram_timing.fsp_msg[2].fsp_cfg[9].val = 0x310;
++	dram_timing.fsp_msg[2].fsp_cfg[21].val = 0x3;
++	dram_timing.fsp_msg[3].fsp_cfg[10].val = 0x310;
++	dram_timing.fsp_msg[3].fsp_cfg[22].val = 0x3;
++}
+diff --git a/board/phytec/phycore_imx8mm/lpddr4_timing.h b/board/phytec/phycore_imx8mm/lpddr4_timing.h
+new file mode 100644
+index 00000000000..47c1915ccad
+--- /dev/null
++++ b/board/phytec/phycore_imx8mm/lpddr4_timing.h
+@@ -0,0 +1,13 @@
++/* SPDX-License-Identifier: GPL-2.0-or-later */
++/*
++ * Copyright (C) 2026 PHYTEC Embedded Pvt. Ltd.
++ * Author: T S Rameshkumar <rameshkumar.t@phytecembedded.in>
++ */
++
++#ifndef __LPDDR4_TIMING_H__
++#define __LPDDR4_TIMING_H__
++
++void set_dram_timings_1gb(void);
++void set_dram_timings_4gb(void);
++
++#endif /* __LPDDR4_TIMING_H__ */
+diff --git a/board/phytec/phycore_imx8mm/phycore-imx8mm.c b/board/phytec/phycore_imx8mm/phycore-imx8mm.c
+index ef647291690..baf99f40a0a 100644
+--- a/board/phytec/phycore_imx8mm/phycore-imx8mm.c
++++ b/board/phytec/phycore_imx8mm/phycore-imx8mm.c
+@@ -10,10 +10,50 @@
+ #include <asm/io.h>
+ #include <asm/mach-imx/boot_mode.h>
+ #include <env.h>
++#include <env_internal.h>
++#include <extension_board.h>
++#include <init.h>
++#include <fdt_support.h>
++#include <jffs2/load_kernel.h>
+ #include <miiphy.h>
++#include <mtd_node.h>
++#include <usb.h>
++
++#include "../common/imx8m_som_detection.h"
+ 
+ DECLARE_GLOBAL_DATA_PTR;
+ 
++#define EEPROM_ADDR		0x51
++#define EEPROM_ADDR_FALLBACK	0x59
++
++int ft_board_setup(void *blob, struct bd_info *bd)
++{
++	u8 spi = phytec_get_imx8m_spi(NULL);
++	/* Do nothing if no SPI is populated */
++	if (!spi)
++		return 0;
++
++	static const struct node_info nodes[] = {
++		{ "jedec,spi-nor", MTD_DEV_TYPE_NOR, },
++	};
++
++	fdt_fixup_mtdparts(blob, nodes, ARRAY_SIZE(nodes));
++
++	return 0;
++}
++
++int board_usb_init(int index, enum usb_init_type init)
++{
++	imx8m_usb_power(index, true);
++	return 0;
++}
++
++int board_usb_cleanup(int index, enum usb_init_type init)
++{
++	imx8m_usb_power(index, false);
++	return 0;
++}
++
+ static int setup_fec(void)
+ {
+ 	struct iomuxc_gpr_base_regs *gpr =
+@@ -27,6 +67,11 @@ static int setup_fec(void)
+ 
+ int board_init(void)
+ {
++	int ret = phytec_eeprom_data_setup_fallback(NULL, 0,
++			EEPROM_ADDR, EEPROM_ADDR_FALLBACK);
++	if (ret)
++		printf("%s: EEPROM data init failed\n", __func__);
++
+ 	setup_fec();
+ 
+ 	return 0;
+@@ -37,18 +82,129 @@ int board_mmc_get_env_dev(int devno)
+ 	return devno;
+ }
+ 
++int mmc_map_to_kernel_blk(int dev_no)
++{
++	return dev_no;
++}
++
++void phytec_set_fit_extensions(void)
++{
++	char fit_extensions[128] = {};
++
++	if (!phytec_get_imx8m_eth(NULL))
++		sprintf(fit_extensions, "%s%s", fit_extensions,
++			"#conf-imx8mm-phycore-no-eth.dtbo");
++
++	if (!phytec_get_imx8m_spi(NULL))
++		sprintf(fit_extensions, "%s%s", fit_extensions,
++			"#conf-imx8mm-phycore-no-spiflash.dtbo");
++
++	env_set("fit_extensions", fit_extensions);
++}
++
+ int board_late_init(void)
+ {
++	u8 spi = phytec_get_imx8m_spi(NULL);
++
++	if (spi != 0 && spi != PHYTEC_EEPROM_INVAL)
++		env_set("spiprobe", "sf probe");
++
+ 	switch (get_boot_device()) {
+ 	case SD2_BOOT:
+ 		env_set_ulong("mmcdev", 1);
++		env_set("boot_targets", "mmc1 mmc2 usb ethernet");
+ 		break;
+ 	case MMC3_BOOT:
+ 		env_set_ulong("mmcdev", 2);
++		env_set("boot_targets", "mmc2 mmc1 usb ethernet");
+ 		break;
+ 	default:
+ 		break;
+ 	}
++	phytec_set_fit_extensions();
+ 
+ 	return 0;
+ }
++
++#ifdef CONFIG_CMD_EXTENSION
++int extension_board_scan(struct list_head *extension_list)
++{
++	struct extension *extension = NULL;
++	int ret = 0;
++	u8 option;
++
++	option = phytec_get_imx8m_eth(NULL);
++	if (!option) {
++		extension = phytec_add_extension("phyCORE-i.MX8MM no eth phy",
++						 "imx8mm-phycore-no-eth.dtbo",
++						 "eth phy not populated on SoM");
++		list_add_tail(&extension->list, extension_list);
++		ret++;
++	}
++
++	option = phytec_get_imx8m_spi(NULL);
++	if (!option) {
++		extension = phytec_add_extension("phyCORE-i.MX8MM no SPI flash",
++						 "imx8mm-phycore-no-spiflash.dtbo",
++						 "SPI flash not populated on SoM");
++		list_add_tail(&extension->list, extension_list);
++		ret++;
++	}
++
++	return ret;
++}
++#endif
++
++enum env_location env_get_location(enum env_operation op, int prio)
++{
++	enum boot_device dev = get_boot_device();
++	enum env_location env_loc = ENVL_UNKNOWN;
++
++	if (prio > 0)
++		return env_loc;
++
++	switch (dev) {
++	case QSPI_BOOT:
++		env_loc = ENVL_SPI_FLASH;
++		break;
++	case SD1_BOOT:
++	case SD2_BOOT:
++	case SD3_BOOT:
++	case MMC2_BOOT:
++	case MMC3_BOOT:
++	case USB_BOOT:
++		env_loc =  ENVL_MMC;
++		break;
++	default:
++		env_loc = ENVL_NOWHERE;
++		break;
++	}
++
++	return env_loc;
++}
++
++int board_phys_sdram_size(phys_size_t *size)
++{
++	if (!size)
++		return -EINVAL;
++
++	*size = get_ram_size((void *)PHYS_SDRAM, PHYS_SDRAM_SIZE);
++
++	return 0;
++}
++
++#ifdef CONFIG_ANDROID_SUPPORT
++#include <asm/arch/imx-regs.h>
++bool is_power_key_pressed(void) {
++	return (bool)(!!(readl(SNVS_HPSR) & (0x1 << 6)));
++}
++#endif
++
++#ifdef CONFIG_FSL_FASTBOOT
++#ifdef CONFIG_ANDROID_RECOVERY
++int is_recovery_key_pressing(void)
++{
++	return 0; /* TODO */
++}
++#endif
++#endif
+diff --git a/board/phytec/phycore_imx8mm/phycore_imx8mm.env b/board/phytec/phycore_imx8mm/phycore_imx8mm.env
+new file mode 100644
+index 00000000000..f95c91fca72
+--- /dev/null
++++ b/board/phytec/phycore_imx8mm/phycore_imx8mm.env
+@@ -0,0 +1,123 @@
++bootcmd=
++	run spiprobe;
++	if test ${dolegacyboot} = 1; then
++		run legacyboot;
++	fi;
++	bootflow scan -lb;
++	if test ${doefiboot} = 1; then
++		setenv bootmeths "efi_mgr efi";
++		setenv boot_targets "mmc2 mmc1 usb";
++		bootflow scan -l;
++		bootflow scan -lb;
++	fi;
++legacyboot=
++	mmc dev ${mmcdev};
++	if mmc rescan; then
++		if test ${doraucboot} = 1; then
++			run raucinit;
++		fi;
++		if run loadimage; then
++			run mmcboot;
++		else
++			if test ${doraucboot} = 1 || test ${dofitboot} = 1; then
++				reset;
++			fi;
++			run netboot;
++		fi;
++	fi;
++boot_targets=mmc2 mmc1 ethernet
++boot_script_dhcp=boot.scr.uimg
++bootmeths=script
++bootenv_addr_r=0x49100000
++console=ttymxc2,115200
++doefiboot=1
++dolegacyboot=0
++emmc_dev=2
++sd_dev=1
++fdt_addr_r=0x48000000
++fdtfile=CONFIG_DEFAULT_FDT_FILE
++fit_fdtconf=conf-CONFIG_DEFAULT_DEVICE_TREE.dtb
++fdtoverlay_addr_r=0x49000000
++image=Image
++ipaddr=192.168.3.11
++serverip=192.168.3.10
++netmask=255.225.255.0
++ip_dyn=no
++kernel_addr_r=0x5A080000
++kernel_comp_addr_r=0x60000000
++kernel_comp_size=0x2000000
++loadimage=fatload mmc ${mmcdev}:${mmcpart} ${loadaddr} ${image}
++loadfdt=fatload mmc ${mmcdev}:${mmcpart} ${fdt_addr_r} ${fdtfile}
++mmcargs=
++	setenv bootargs console=${console} ${optargs}
++	root=/dev/mmcblk${mmcdev}p${mmcroot} ${raucargs} rootwait rw
++mmcautodetect=yes
++mmcboot=
++	echo Booting from mmc ...;
++	run mmcargs;
++	if test ${no_bootenv} = 0; then
++		if run mmc_load_bootenv; then
++			if test ${dofitboot} = 1; then
++				env import -t ${bootenv_addr_r} ${filesize} overlays;
++			else
++				env import -t ${bootenv_addr_r} ${filesize};
++			fi;
++		fi;
++	fi;
++	run fit_test_and_run_boot;
++	if run loadfdt; then
++		run mmc_apply_overlays;
++		run mmc_apply_extensions;
++		booti ${loadaddr} - ${fdt_addr_r};
++	else
++		echo WARN: Cannot load the DT;
++	fi;
++mmcdev=CONFIG_SYS_MMC_ENV_DEV
++mmcpart=1
++mmcroot=2
++mtdparts=30bb0000.spi:3840k(u-boot),128k(env),128k(env_redund),-(none)
++mtdids=nor0=30bb0000.spi
++spiprobe=true
++netargs=
++	setenv bootargs console=${console} root=/dev/nfs ip=${nfsip} ${optargs}
++	nfsroot=${serverip}:${nfsroot},v3,tcp
++netboot=
++	echo Booting from net ...;
++	if test ${ip_dyn} = yes; then
++		setenv nfsip dhcp;
++		setenv get_cmd dhcp;
++	else
++		setenv nfsip ${ipaddr}:${serverip}::${netmask}::eth0:on;
++		setenv get_cmd tftp;
++	fi;
++	if test ${no_bootenv} = 0; then
++		if run net_load_bootenv; then
++			env import -t ${bootenv_addr_r} ${filesize};
++		fi;
++	fi;
++	${get_cmd} ${loadaddr} ${image};
++	run netargs;
++	if ${get_cmd} ${fdt_addr_r} ${fdtfile}; then
++		run net_apply_overlays;
++		run net_apply_extensions;
++		booti ${loadaddr} - ${fdt_addr_r};
++	else
++		echo WARN: Cannot load the DT;
++	fi;
++nfsroot=/srv/nfs
++no_bootenv=0
++no_extensions=0
++pxefile_addr_r=0x58600000
++ramdisk_addr_r=0x5E000000
++scriptaddr=0x58500000
++script_offset_f=0x400000
++script_size_f=0x2000
++prepare_mcore=setenv optargs "${optargs} clk-imx8mm.mcore_booted"
++update_bootimg=
++	mmc dev ${mmcdev};
++	if dhcp ${loadaddr} ${update_filepath}/${update_filename}; then
++		setexpr fw_sz ${filesize} / 0x200;
++		mmc write ${loadaddr} ${update_offset} ${fw_sz};
++	fi;
++update_filename=flash.bin
++update_offset=0x42
+-- 
+2.34.1
+
