@@ -1,0 +1,71 @@
+From f4815eb1580d854bc50f135698935116172e42b1 Mon Sep 17 00:00:00 2001
+From: T S Rameshkumar <rameshkumar.t@phytecembedded.in>
+Date: Mon, 12 Oct 2026 11:09:15 +0530
+Subject: [PATCH 4/5] clk: imx8mm: Preserve clock provider phandles in SPL DTB
+ and add CCM fallback
+
+Tag &osc_32k, &clk_ext1..4 with bootph-all and bootph-pre-ram in imx8mm-u-boot.dtsi so fdtgrep preserves clock provider nodes in u-boot-spl.dtb. Add CCM_BASE_ADDR fallback in imx8mm_clk_probe.
+---
+ arch/arm/dts/imx8mm-u-boot.dtsi | 25 +++++++++++++++++++++++++
+ drivers/clk/imx/clk-imx8mm.c    |  4 ++--
+ 2 files changed, 27 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm/dts/imx8mm-u-boot.dtsi b/arch/arm/dts/imx8mm-u-boot.dtsi
+index 0a93c1926d0..bd7aa112b90 100644
+--- a/arch/arm/dts/imx8mm-u-boot.dtsi
++++ b/arch/arm/dts/imx8mm-u-boot.dtsi
+@@ -217,11 +217,36 @@
+ 	bootph-pre-ram;
+ };
+ 
++&osc_32k {
++	bootph-all;
++	bootph-pre-ram;
++};
++
+ &osc_24m {
+ 	bootph-all;
+ 	bootph-pre-ram;
+ };
+ 
++&clk_ext1 {
++	bootph-all;
++	bootph-pre-ram;
++};
++
++&clk_ext2 {
++	bootph-all;
++	bootph-pre-ram;
++};
++
++&clk_ext3 {
++	bootph-all;
++	bootph-pre-ram;
++};
++
++&clk_ext4 {
++	bootph-all;
++	bootph-pre-ram;
++};
++
+ #ifdef CONFIG_FSL_CAAM
+ &sec_jr0 {
+ 	bootph-pre-ram;
+diff --git a/drivers/clk/imx/clk-imx8mm.c b/drivers/clk/imx/clk-imx8mm.c
+index 4871f016688..4fa33282207 100644
+--- a/drivers/clk/imx/clk-imx8mm.c
++++ b/drivers/clk/imx/clk-imx8mm.c
+@@ -285,8 +285,8 @@ static int imx8mm_clk_probe(struct udevice *dev)
+ 	       imx_clk_fixed_factor("sys_pll2_1000m", "sys_pll2_out", 1, 1));
+ 
+ 	base = dev_read_addr_ptr(dev);
+-	if (!base)
+-		return -EINVAL;
++	if (!base || base == (void *)-1)
++		base = (void *)CCM_BASE_ADDR;
+ 
+ 	clk_dm(IMX8MM_CLK_A53_SRC,
+ 	       imx_clk_mux2("arm_a53_src", base + 0x8000, 24, 3,
+-- 
+2.34.1
+

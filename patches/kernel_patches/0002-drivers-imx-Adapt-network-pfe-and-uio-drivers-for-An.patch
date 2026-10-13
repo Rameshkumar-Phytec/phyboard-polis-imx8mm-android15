@@ -1,0 +1,250 @@
+From d50c06b7c0811d8e5703cd81792194a0330885e9 Mon Sep 17 00:00:00 2001
+From: T S Rameshkumar <rameshkumar.t@phytecembedded.in>
+Date: Tue, 13 Oct 2026 17:56:54 +0530
+Subject: [PATCH 2/6] drivers: imx: Adapt network, pfe, and uio drivers for
+ Android 15 GKI compliance
+
+Add export symbol annotations and CONFIG_IMX_GKI_FIX guards in DPAA2,
+STMMAC, PFE, and IVSHMEM drivers to satisfy Android 15 Generic Kernel
+Image (GKI) symbol ABI whitelist requirements and module dependencies.
+
+Signed-off-by: T S Rameshkumar <rameshkumar.t@phytecembedded.in>
+---
+ drivers/gpio/gpio-imx-scu.c                       | 1 +
+ drivers/net/dsa/ocelot/felix.c                    | 2 ++
+ drivers/net/ethernet/freescale/dpaa2/dpaa2-eth.c  | 3 +++
+ drivers/net/ethernet/freescale/dpaa2/dpaa2-mac.c  | 4 ++++
+ drivers/net/ethernet/freescale/sdk_dpaa/mac.c     | 7 +++++--
+ drivers/net/ethernet/stmicro/stmmac/hwif.c        | 1 +
+ drivers/net/ethernet/stmicro/stmmac/stmmac_main.c | 1 +
+ drivers/net/ethernet/stmicro/stmmac/stmmac_mdio.c | 2 ++
+ drivers/net/phy/mscc/mscc_main.c                  | 4 ++++
+ drivers/phy/freescale/phy-fsl-lynx-10g.c          | 2 ++
+ drivers/staging/fsl_ppfe/pfe_eth.c                | 9 +++++++--
+ drivers/uio/uio_ivshmem.c                         | 4 ++++
+ 12 files changed, 36 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/gpio/gpio-imx-scu.c b/drivers/gpio/gpio-imx-scu.c
+index 13baf465aedf..43f0b772b72b 100644
+--- a/drivers/gpio/gpio-imx-scu.c
++++ b/drivers/gpio/gpio-imx-scu.c
+@@ -137,3 +137,4 @@ subsys_initcall_sync(_imx_scu_gpio_init);
+ 
+ MODULE_AUTHOR("Shenwei Wang <shenwei.wang@nxp.com>");
+ MODULE_DESCRIPTION("NXP GPIO over IMX SCU API");
++MODULE_LICENSE("GPL");
+diff --git a/drivers/net/dsa/ocelot/felix.c b/drivers/net/dsa/ocelot/felix.c
+index 3e5105267c57..ba1291186f99 100644
+--- a/drivers/net/dsa/ocelot/felix.c
++++ b/drivers/net/dsa/ocelot/felix.c
+@@ -1045,7 +1045,9 @@ static const u32 felix_phy_match_table[PHY_INTERFACE_MODE_MAX] = {
+ 	[PHY_INTERFACE_MODE_SGMII] = OCELOT_PORT_MODE_SGMII,
+ 	[PHY_INTERFACE_MODE_QSGMII] = OCELOT_PORT_MODE_QSGMII,
+ 	[PHY_INTERFACE_MODE_USXGMII] = OCELOT_PORT_MODE_USXGMII,
++#ifndef CONFIG_IMX_GKI_FIX
+ 	[PHY_INTERFACE_MODE_10G_QXGMII] = OCELOT_PORT_MODE_10G_QXGMII,
++#endif
+ 	[PHY_INTERFACE_MODE_1000BASEX] = OCELOT_PORT_MODE_1000BASEX,
+ 	[PHY_INTERFACE_MODE_2500BASEX] = OCELOT_PORT_MODE_2500BASEX,
+ };
+diff --git a/drivers/net/ethernet/freescale/dpaa2/dpaa2-eth.c b/drivers/net/ethernet/freescale/dpaa2/dpaa2-eth.c
+index d47d72d66988..898c07e051bd 100644
+--- a/drivers/net/ethernet/freescale/dpaa2/dpaa2-eth.c
++++ b/drivers/net/ethernet/freescale/dpaa2/dpaa2-eth.c
+@@ -617,6 +617,7 @@ void dpaa2_eth_rx(struct dpaa2_eth_priv *priv,
+ 	struct rtnl_link_stats64 *percpu_stats;
+ 	struct dpaa2_eth_drv_stats *percpu_extras;
+ 	struct device *dev = priv->net_dev->dev.parent;
++	bool recycle_rx_buf = false;
+ 	void *buf_data;
+ 	u32 xdp_act;
+ 
+@@ -646,6 +647,8 @@ void dpaa2_eth_rx(struct dpaa2_eth_priv *priv,
+ 			dma_unmap_page(dev, addr, priv->rx_buf_size,
+ 				       DMA_BIDIRECTIONAL);
+ 			skb = dpaa2_eth_build_linear_skb(ch, fd, vaddr);
++		} else {
++			recycle_rx_buf = true;
+ 		}
+ 	} else if (fd_format == dpaa2_fd_sg) {
+ 		WARN_ON(priv->xdp_prog);
+diff --git a/drivers/net/ethernet/freescale/dpaa2/dpaa2-mac.c b/drivers/net/ethernet/freescale/dpaa2/dpaa2-mac.c
+index 495308a11c37..f115ed0c5013 100644
+--- a/drivers/net/ethernet/freescale/dpaa2/dpaa2-mac.c
++++ b/drivers/net/ethernet/freescale/dpaa2/dpaa2-mac.c
+@@ -92,13 +92,17 @@ static enum dpmac_eth_if dpmac_eth_if_mode(phy_interface_t if_mode)
+ 		return DPMAC_ETH_IF_SGMII;
+ 	case PHY_INTERFACE_MODE_10GBASER:
+ 	case PHY_INTERFACE_MODE_10GKR:
++#ifndef CONFIG_IMX_GKI_FIX
+ 	case PHY_INTERFACE_MODE_40GKR4:
++#endif
+ 		return DPMAC_ETH_IF_XFI;
+ 	case PHY_INTERFACE_MODE_1000BASEX:
+ 	case PHY_INTERFACE_MODE_1000BASEKX:
+ 		return DPMAC_ETH_IF_1000BASEX;
+ 	case PHY_INTERFACE_MODE_25GBASER:
++#ifndef CONFIG_IMX_GKI_FIX
+ 	case PHY_INTERFACE_MODE_25GKR:
++#endif
+ 		return DPMAC_ETH_IF_CAUI;
+ 	default:
+ 		return DPMAC_ETH_IF_MII;
+diff --git a/drivers/net/ethernet/freescale/sdk_dpaa/mac.c b/drivers/net/ethernet/freescale/sdk_dpaa/mac.c
+index a4ecd47f39de..a12c3b39d41c 100644
+--- a/drivers/net/ethernet/freescale/sdk_dpaa/mac.c
++++ b/drivers/net/ethernet/freescale/sdk_dpaa/mac.c
+@@ -299,8 +299,11 @@ static int __cold mac_probe(struct platform_device *_of_dev)
+ 	mac_dev->if_support = DTSEC_SUPPORTED;
+ 	/* We don't support half-duplex in SGMII mode */
+ 	if (mac_dev->phy_if == PHY_INTERFACE_MODE_SGMII ||
+-	    mac_dev->phy_if == PHY_INTERFACE_MODE_QSGMII ||
+-	    mac_dev->phy_if == PHY_INTERFACE_MODE_2500SGMII)
++	    mac_dev->phy_if == PHY_INTERFACE_MODE_QSGMII
++#ifndef CONFIG_IMX_GKI_FIX
++	    || mac_dev->phy_if == PHY_INTERFACE_MODE_2500SGMII
++#endif
++	   )
+ 		mac_dev->if_support &= ~(SUPPORTED_10baseT_Half |
+ 					SUPPORTED_100baseT_Half);
+ 
+diff --git a/drivers/net/ethernet/stmicro/stmmac/hwif.c b/drivers/net/ethernet/stmicro/stmmac/hwif.c
+index b8ba8f2d8041..e26297aecb41 100644
+--- a/drivers/net/ethernet/stmicro/stmmac/hwif.c
++++ b/drivers/net/ethernet/stmicro/stmmac/hwif.c
+@@ -353,3 +353,4 @@ int stmmac_hwif_init(struct stmmac_priv *priv)
+ 			id, needs_gmac, needs_gmac4);
+ 	return -EINVAL;
+ }
++EXPORT_SYMBOL_GPL(stmmac_hwif_init);
+diff --git a/drivers/net/ethernet/stmicro/stmmac/stmmac_main.c b/drivers/net/ethernet/stmicro/stmmac/stmmac_main.c
+index e7dcf9b2d3a4..e7264991972f 100644
+--- a/drivers/net/ethernet/stmicro/stmmac/stmmac_main.c
++++ b/drivers/net/ethernet/stmicro/stmmac/stmmac_main.c
+@@ -524,6 +524,7 @@ bool stmmac_eee_init(struct stmmac_priv *priv)
+ 	netdev_dbg(priv->dev, "Energy-Efficient Ethernet initialized\n");
+ 	return true;
+ }
++EXPORT_SYMBOL_GPL(stmmac_eee_init);
+ 
+ /* stmmac_get_tx_hwtstamp - get HW TX timestamps
+  * @priv: driver private structure
+diff --git a/drivers/net/ethernet/stmicro/stmmac/stmmac_mdio.c b/drivers/net/ethernet/stmicro/stmmac/stmmac_mdio.c
+index be4d12c28dd3..ace1346f5c38 100644
+--- a/drivers/net/ethernet/stmicro/stmmac/stmmac_mdio.c
++++ b/drivers/net/ethernet/stmicro/stmmac/stmmac_mdio.c
+@@ -675,6 +675,7 @@ int stmmac_mdio_register(struct net_device *ndev)
+ 	mdiobus_free(new_bus);
+ 	return err;
+ }
++EXPORT_SYMBOL_GPL(stmmac_mdio_register);
+ 
+ /**
+  * stmmac_mdio_unregister
+@@ -698,3 +699,4 @@ int stmmac_mdio_unregister(struct net_device *ndev)
+ 
+ 	return 0;
+ }
++EXPORT_SYMBOL_GPL(stmmac_mdio_unregister);
+diff --git a/drivers/net/phy/mscc/mscc_main.c b/drivers/net/phy/mscc/mscc_main.c
+index 20c33c1a84c2..61eb9244f8bf 100644
+--- a/drivers/net/phy/mscc/mscc_main.c
++++ b/drivers/net/phy/mscc/mscc_main.c
+@@ -2202,6 +2202,7 @@ static int vsc85xx_read_status(struct phy_device *phydev)
+ 	return genphy_read_status(phydev);
+ }
+ 
++#ifndef CONFIG_IMX_GKI_FIX
+ static int vsc8514_validate_inband_aneg(struct phy_device *phydev,
+ 					phy_interface_t interface)
+ {
+@@ -2219,6 +2220,7 @@ static int vsc8514_config_inband_aneg(struct phy_device *phydev, bool enabled)
+ 				MSCC_PHY_SERDES_PCS_CTRL, MSCC_PHY_SERDES_ANEG,
+ 				reg_val);
+ }
++#endif
+ 
+ static int vsc8514_probe(struct phy_device *phydev)
+ {
+@@ -2450,8 +2452,10 @@ static struct phy_driver vsc85xx_driver[] = {
+ 	.get_sset_count = &vsc85xx_get_sset_count,
+ 	.get_strings    = &vsc85xx_get_strings,
+ 	.get_stats      = &vsc85xx_get_stats,
++#ifndef CONFIG_IMX_GKI_FIX
+ 	.validate_inband_aneg = vsc8514_validate_inband_aneg,
+ 	.config_inband_aneg = vsc8514_config_inband_aneg,
++#endif
+ },
+ {
+ 	.phy_id		= PHY_ID_VSC8530,
+diff --git a/drivers/phy/freescale/phy-fsl-lynx-10g.c b/drivers/phy/freescale/phy-fsl-lynx-10g.c
+index 9a5c0c1db83f..5f41a1bbeb22 100644
+--- a/drivers/phy/freescale/phy-fsl-lynx-10g.c
++++ b/drivers/phy/freescale/phy-fsl-lynx-10g.c
+@@ -1215,8 +1215,10 @@ static enum lynx_lane_mode phy_interface_to_lane_mode(phy_interface_t intf)
+ 		return LANE_MODE_10GBASER;
+ 	case PHY_INTERFACE_MODE_USXGMII:
+ 		return LANE_MODE_USXGMII;
++#ifndef CONFIG_IMX_GKI_FIX
+ 	case PHY_INTERFACE_MODE_10G_QXGMII:
+ 		return LANE_MODE_10G_QXGMII;
++#endif
+ 	case PHY_INTERFACE_MODE_QSGMII:
+ 		return LANE_MODE_QSGMII;
+ 	default:
+diff --git a/drivers/staging/fsl_ppfe/pfe_eth.c b/drivers/staging/fsl_ppfe/pfe_eth.c
+index 1f0f39a176dd..baf16f8b45a0 100644
+--- a/drivers/staging/fsl_ppfe/pfe_eth.c
++++ b/drivers/staging/fsl_ppfe/pfe_eth.c
+@@ -1195,8 +1195,10 @@ static void ls1012a_configure_serdes(struct net_device *ndev)
+ 	struct mii_bus *bus = mdio_priv->mii_bus;
+ 	u16 value = 0;
+ 
++#ifndef CONFIG_IMX_GKI_FIX
+ 	if (eth_priv->einfo->mii_config == PHY_INTERFACE_MODE_2500SGMII)
+ 		sgmii_2500 = 1;
++#endif
+ 
+ 	netif_info(eth_priv, drv, ndev, "%s\n", __func__);
+ 	/* PCS configuration done with corresponding GEMAC */
+@@ -1253,8 +1255,11 @@ static int pfe_phy_init(struct net_device *ndev)
+ 		 priv->einfo->phy_id);
+ 	netif_info(priv, drv, ndev, "%s: %s\n", __func__, phy_id);
+ 	interface = priv->einfo->mii_config;
+-	if ((interface == PHY_INTERFACE_MODE_SGMII) ||
+-	    (interface == PHY_INTERFACE_MODE_2500SGMII)) {
++	if (interface == PHY_INTERFACE_MODE_SGMII
++#ifndef CONFIG_IMX_GKI_FIX
++	    || interface == PHY_INTERFACE_MODE_2500SGMII
++#endif
++	   ) {
+ 		/*Configure SGMII PCS */
+ 		if (pfe->scfg) {
+ 			/* Config MDIO from serdes */
+diff --git a/drivers/uio/uio_ivshmem.c b/drivers/uio/uio_ivshmem.c
+index 0c16d428c6ed..8d19e5194ae9 100644
+--- a/drivers/uio/uio_ivshmem.c
++++ b/drivers/uio/uio_ivshmem.c
+@@ -111,7 +111,9 @@ static int ivshm_probe(struct pci_dev *pdev, const struct pci_device_id *id)
+ 	pci_read_config_dword(pdev, cap_pos, &dword);
+ 	mem->size = dword;
+ 	mem->memtype = UIO_MEM_IOVA;
++#ifndef CONFIG_IMX_GKI_FIX
+ 	mem->readonly = true;
++#endif
+ 	if (!devm_request_mem_region(&pdev->dev, mem->addr, mem->size,
+ 				     device_name))
+ 		return -EBUSY;
+@@ -146,7 +148,9 @@ static int ivshm_probe(struct pci_dev *pdev, const struct pci_device_id *id)
+ 		mem->size =
+ 			readl(&ivshm_dev->regs->max_peers) * output_section_sz;
+ 		mem->memtype = UIO_MEM_IOVA;
++#ifndef CONFIG_IMX_GKI_FIX
+ 		mem->readonly = true;
++#endif
+ 		if (!devm_request_mem_region(&pdev->dev, mem->addr, mem->size,
+ 					     device_name))
+ 			return -EBUSY;
+-- 
+2.34.1
+

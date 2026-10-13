@@ -1,0 +1,257 @@
+From 14ed883074dac0c00cfafc8b7347602a6e3c6b8e Mon Sep 17 00:00:00 2001
+From: T S Rameshkumar <rameshkumar.t@phytecembedded.in>
+Date: Tue, 13 Oct 2026 17:59:23 +0530
+Subject: [PATCH 4/6] arm64: dts: freescale: Add PHYTEC phyCORE-i.MX8MM SOM
+ support and base overlays
+
+Add device tree definitions for the PHYTEC phyCORE-i.MX8MM System-on-Module
+(PCM-066 / PCL-069 SOM). Configure 2GB LPDDR4 memory node, PMIC regulators,
+eMMC storage, SPI NOR flash, and Gigabit Ethernet PHY. Add base SOM overlays
+for disabling Ethernet, SPI flash, and enabling RPMSG.
+
+Signed-off-by: T S Rameshkumar <rameshkumar.t@phytecembedded.in>
+---
+ .../dts/freescale/imx8mm-phycore-no-eth.dtso  | 12 ++++
+ .../freescale/imx8mm-phycore-no-spiflash.dtso | 16 +++++
+ .../dts/freescale/imx8mm-phycore-rpmsg.dtso   | 55 ++++++++++++++++
+ .../dts/freescale/imx8mm-phycore-som.dtsi     | 64 +++++++++----------
+ 4 files changed, 113 insertions(+), 34 deletions(-)
+ create mode 100644 arch/arm64/boot/dts/freescale/imx8mm-phycore-no-eth.dtso
+ create mode 100644 arch/arm64/boot/dts/freescale/imx8mm-phycore-no-spiflash.dtso
+ create mode 100644 arch/arm64/boot/dts/freescale/imx8mm-phycore-rpmsg.dtso
+
+diff --git a/arch/arm64/boot/dts/freescale/imx8mm-phycore-no-eth.dtso b/arch/arm64/boot/dts/freescale/imx8mm-phycore-no-eth.dtso
+new file mode 100644
+index 000000000000..dd66ccfbb4d7
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/imx8mm-phycore-no-eth.dtso
+@@ -0,0 +1,12 @@
++// SPDX-License-Identifier: GPL-2.0
++/*
++ * Copyright (C) 2024 PHYTEC Messtechnik GmbH
++ * Author: Teresa Remmet <t.remmet@phytec.de>
++ */
++
++/dts-v1/;
++/plugin/;
++
++&ethphy0 {
++	status = "disabled";
++};
+diff --git a/arch/arm64/boot/dts/freescale/imx8mm-phycore-no-spiflash.dtso b/arch/arm64/boot/dts/freescale/imx8mm-phycore-no-spiflash.dtso
+new file mode 100644
+index 000000000000..71918a3241d5
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/imx8mm-phycore-no-spiflash.dtso
+@@ -0,0 +1,16 @@
++// SPDX-License-Identifier: GPL-2.0
++/*
++ * Copyright (C) 2024 PHYTEC Messtechnik GmbH
++ * Author: Teresa Remmet <t.remmet@phytec.de>
++ */
++
++/dts-v1/;
++/plugin/;
++
++&flexspi {
++	status = "disabled";
++};
++
++&som_flash {
++	status = "disabled";
++};
+diff --git a/arch/arm64/boot/dts/freescale/imx8mm-phycore-rpmsg.dtso b/arch/arm64/boot/dts/freescale/imx8mm-phycore-rpmsg.dtso
+new file mode 100644
+index 000000000000..0c61946f0cf8
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/imx8mm-phycore-rpmsg.dtso
+@@ -0,0 +1,55 @@
++// SPDX-License-Identifier: GPL-2.0
++/*
++ * Copyright (C) 2024 PHYTEC Messtechnik GmbH
++ * Author: Dominik Haller <d.haller@phytec.de>
++ */
++
++/dts-v1/;
++/plugin/;
++
++#include <dt-bindings/clock/imx8mm-clock.h>
++
++&{/} {
++	reserved-memory {
++		#address-cells = <2>;
++		#size-cells = <2>;
++		ranges;
++
++		m4_reserved: m4@80000000 {
++			reg = <0 0x80000000 0 0x1000000>;
++			no-map;
++		};
++
++		vdev0vring0: vdev0vring0@b8000000 {
++			reg = <0 0xb8000000 0 0x8000>;
++			no-map;
++		};
++
++		vdev0vring1: vdev0vring1@b8008000 {
++			reg = <0 0xb8008000 0 0x8000>;
++			no-map;
++		};
++
++		rsc_table: rsc_table@b80ff000 {
++			reg = <0 0xb80ff000 0 0x1000>;
++			no-map;
++		};
++
++		vdevbuffer: vdevbuffer@b8400000 {
++			compatible = "shared-dma-pool";
++			reg = <0 0xb8400000 0 0x100000>;
++			no-map;
++		};
++	};
++
++	core-m4 {
++		compatible = "fsl,imx8mm-cm4";
++		clocks = <&clk IMX8MM_CLK_M4_DIV>;
++		mboxes = <&mu 0 1
++			&mu 1 1
++			&mu 3 1>;
++		mbox-names = "tx", "rx", "rxdb";
++		memory-region = <&vdevbuffer>, <&vdev0vring0>, <&vdev0vring1>, <&rsc_table>;
++		syscon = <&src>;
++	};
++};
+diff --git a/arch/arm64/boot/dts/freescale/imx8mm-phycore-som.dtsi b/arch/arm64/boot/dts/freescale/imx8mm-phycore-som.dtsi
+index 6069678244f3..a80008084b8a 100644
+--- a/arch/arm64/boot/dts/freescale/imx8mm-phycore-som.dtsi
++++ b/arch/arm64/boot/dts/freescale/imx8mm-phycore-som.dtsi
+@@ -47,29 +47,8 @@ &A53_3 {
+ 	cpu-supply = <&reg_vdd_arm>;
+ };
+ 
+-&ddrc {
+-	operating-points-v2 = <&ddrc_opp_table>;
+-
+-	ddrc_opp_table: opp-table {
+-		compatible = "operating-points-v2";
+-
+-		opp-25000000 {
+-			opp-hz = /bits/ 64 <25000000>;
+-		};
+-
+-		opp-100000000 {
+-			opp-hz = /bits/ 64 <100000000>;
+-		};
+-
+-		opp-750000000 {
+-			opp-hz = /bits/ 64 <750000000>;
+-		};
+-	};
+-};
+-
+ /* Ethernet */
+ &fec1 {
+-	fsl,magic-packet;
+ 	phy-mode = "rgmii-id";
+ 	phy-handle = <&ethphy0>;
+ 	pinctrl-names = "default";
+@@ -118,6 +97,11 @@ &gpio1 {
+ 		"", "", "nENABLE_FLATLINK";
+ };
+ 
++/* GPU */
++&gpu {
++	status = "okay";
++};
++
+ /* I2C1 */
+ &i2c1 {
+ 	clock-frequency = <400000>;
+@@ -161,11 +145,13 @@ reg_vcc_enet: ldo3 {
+ 				regulator-always-on;
+ 				regulator-boot-on;
+ 				regulator-max-microvolt = <2500000>;
+-				regulator-min-microvolt = <1500000>;
++				regulator-min-microvolt = <2500000>;
+ 				regulator-name = "VCC_ENET_2V5 (LDO3)";
+ 
+ 				regulator-state-mem {
+-					regulator-off-in-suspend;
++					regulator-on-in-suspend;
++					regulator-suspend-max-microvolt = <2500000>;
++					regulator-suspend-min-microvolt = <2500000>;
+ 				};
+ 			};
+ 
+@@ -285,9 +271,11 @@ sn65dsi83: bridge@2d {
+ 		pinctrl-names = "default";
+ 		pinctrl-0 = <&pinctrl_sn65dsi83>;
+ 		reg = <0x2d>;
++		vcc-supply = <&reg_vdd_1v8>;
+ 		status = "disabled";
+ 	};
+ 
++	/* EEPROM */
+ 	eeprom@51 {
+ 		compatible = "atmel,24c32";
+ 		pagesize = <32>;
+@@ -295,17 +283,14 @@ eeprom@51 {
+ 		vcc-supply = <&reg_vdd_3v3_s>;
+ 	};
+ 
++	/* RTC */
+ 	rv3028: rtc@52 {
+ 		compatible = "microcrystal,rv3028";
+-		interrupts = <3 IRQ_TYPE_LEVEL_LOW>;
+-		interrupt-parent = <&gpio1>;
+-		pinctrl-names = "default";
+-		pinctrl-0 = <&pinctrl_rtc>;
+ 		reg = <0x52>;
+ 	};
+ };
+ 
+-/* EMMC */
++/* eMMC */
+ &usdhc3 {
+ 	assigned-clocks = <&clk IMX8MM_CLK_USDHC3_ROOT>;
+ 	assigned-clock-rates = <400000000>;
+@@ -319,6 +304,23 @@ &usdhc3 {
+ 	status = "okay";
+ };
+ 
++/* VPU */
++&vpu_g1 {
++	status = "okay";
++};
++
++&vpu_g2 {
++	status = "okay";
++};
++
++&vpu_h1 {
++	status = "okay";
++};
++
++&vpu_v4l2 {
++	status = "okay";
++};
++
+ /* Watchdog */
+ &wdog1 {
+ 	fsl,ext-reset-output;
+@@ -373,12 +375,6 @@ MX8MM_IOMUXC_I2C1_SCL_GPIO5_IO14		0x1e0
+ 		>;
+ 	};
+ 
+-	pinctrl_rtc: rtcgrp {
+-		fsl,pins = <
+-			MX8MM_IOMUXC_GPIO1_IO03_GPIO1_IO3		0x1c0
+-		>;
+-	};
+-
+ 	pinctrl_sn65dsi83: sn65dsi83grp {
+ 		fsl,pins = <
+ 			MX8MM_IOMUXC_GPIO1_IO10_GPIO1_IO10		0x0
+-- 
+2.34.1
+

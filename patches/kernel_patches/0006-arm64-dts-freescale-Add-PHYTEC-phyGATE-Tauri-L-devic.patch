@@ -1,0 +1,1136 @@
+From c5bde9b1e5fa04b8fc414e47f45801be9b7b4ce2 Mon Sep 17 00:00:00 2001
+From: T S Rameshkumar <rameshkumar.t@phytecembedded.in>
+Date: Tue, 13 Oct 2026 18:00:04 +0530
+Subject: [PATCH 6/6] arm64: dts: freescale: Add PHYTEC phyGATE-Tauri-L device
+ trees and interface overlays
+
+Add base device tree for PHYTEC phyGATE-Tauri-L industrial IoT gateway based
+on phyCORE-i.MX8MM. Provide device tree overlays for RS-232, RS-485, and
+analog I/O expansion board configurations.
+
+Signed-off-by: T S Rameshkumar <rameshkumar.t@phytecembedded.in>
+---
+ .../imx8mm-phygate-tauri-l-analog-io.dtso     | 327 +++++++++++
+ .../imx8mm-phygate-tauri-l-rs232-rs232.dtso   |  67 +++
+ ...hygate-tauri-l-rs232-rs485-switchable.dtso |  49 ++
+ .../imx8mm-phygate-tauri-l-rs232-rs485.dtso   |  71 +++
+ .../imx8mm-phygate-tauri-l-rs232-rts-cts.dtso |  35 ++
+ .../dts/freescale/imx8mm-phygate-tauri-l.dts  | 522 ++++++++++++++++++
+ 6 files changed, 1071 insertions(+)
+ create mode 100644 arch/arm64/boot/dts/freescale/imx8mm-phygate-tauri-l-analog-io.dtso
+ create mode 100644 arch/arm64/boot/dts/freescale/imx8mm-phygate-tauri-l-rs232-rs232.dtso
+ create mode 100644 arch/arm64/boot/dts/freescale/imx8mm-phygate-tauri-l-rs232-rs485-switchable.dtso
+ create mode 100644 arch/arm64/boot/dts/freescale/imx8mm-phygate-tauri-l-rs232-rs485.dtso
+ create mode 100644 arch/arm64/boot/dts/freescale/imx8mm-phygate-tauri-l-rs232-rts-cts.dtso
+ create mode 100644 arch/arm64/boot/dts/freescale/imx8mm-phygate-tauri-l.dts
+
+diff --git a/arch/arm64/boot/dts/freescale/imx8mm-phygate-tauri-l-analog-io.dtso b/arch/arm64/boot/dts/freescale/imx8mm-phygate-tauri-l-analog-io.dtso
+new file mode 100644
+index 000000000000..5e525fe6f523
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/imx8mm-phygate-tauri-l-analog-io.dtso
+@@ -0,0 +1,327 @@
++// SPDX-License-Identifier: GPL-2.0
++/*
++* Copyright (C) 2023 PHYTEC Messtechnik GmbH
++* Author: Felix Siebel <f.siebel@phytec.de>
++*/
++
++/dts-v1/;
++/plugin/;
++
++#include <dt-bindings/leds/common.h>
++#include <dt-bindings/gpio/gpio.h>
++#include <dt-bindings/interrupt-controller/irq.h>
++
++&{/}{
++	leds-expander {
++		compatible = "gpio-leds";
++
++		led1-iso1 {
++			function = LED_FUNCTION_STATUS;
++			color = <LED_COLOR_ID_GREEN>;
++			gpios = <&pca9535_0 4  GPIO_ACTIVE_LOW>;
++			linux,default-trigger = "off";
++			default-state = "on";
++		};
++
++		led2-iso1 {
++			function = LED_FUNCTION_STATUS;
++			color = <LED_COLOR_ID_GREEN>;
++			gpios = <&pca9535_0 5  GPIO_ACTIVE_LOW>;
++			linux,default-trigger = "off";
++			default-state = "on";
++		};
++
++		led3-iso1 {
++			function = LED_FUNCTION_STATUS;
++			color = <LED_COLOR_ID_GREEN>;
++			gpios = <&pca9535_0 6  GPIO_ACTIVE_LOW>;
++			linux,default-trigger = "off";
++			default-state = "on";
++		};
++
++		led4-iso1 {
++			function = LED_FUNCTION_STATUS;
++			color = <LED_COLOR_ID_GREEN>;
++			gpios = <&pca9535_0 7  GPIO_ACTIVE_LOW>;
++			linux,default-trigger = "off";
++			default-state = "on";
++		};
++
++		led5-r-iso1 {
++			function = LED_FUNCTION_STATUS;
++			color = <LED_COLOR_ID_RED>;
++			gpios = <&pca9535_0 8  GPIO_ACTIVE_LOW>;
++			linux,default-trigger = "off";
++			default-state = "on";
++		};
++
++		led5-g-iso1 {
++			function = LED_FUNCTION_STATUS;
++			color = <LED_COLOR_ID_GREEN>;
++			gpios = <&pca9535_0 9  GPIO_ACTIVE_LOW>;
++			linux,default-trigger = "off";
++			default-state = "on";
++		};
++
++		led5-b-iso1 {
++			function = LED_FUNCTION_STATUS;
++			color = <LED_COLOR_ID_BLUE>;
++			gpios = <&pca9535_0 10  GPIO_ACTIVE_LOW>;
++			linux,default-trigger = "off";
++			default-state = "on";
++		};
++
++		led1-iso2 {
++			function = LED_FUNCTION_STATUS;
++			color = <LED_COLOR_ID_GREEN>;
++			gpios = <&pca9535_1 4  GPIO_ACTIVE_LOW>;
++			linux,default-trigger = "off";
++			default-state = "on";
++		};
++
++		led2-iso2 {
++			function = LED_FUNCTION_STATUS;
++			color = <LED_COLOR_ID_GREEN>;
++			gpios = <&pca9535_1 5  GPIO_ACTIVE_LOW>;
++			linux,default-trigger = "off";
++			default-state = "on";
++		};
++
++		led3-iso2 {
++			function = LED_FUNCTION_STATUS;
++			color = <LED_COLOR_ID_GREEN>;
++			gpios = <&pca9535_1 6  GPIO_ACTIVE_LOW>;
++			linux,default-trigger = "off";
++			default-state = "on";
++		};
++
++		led4-iso2 {
++			function = LED_FUNCTION_STATUS;
++			color = <LED_COLOR_ID_GREEN>;
++			gpios = <&pca9535_1 7  GPIO_ACTIVE_LOW>;
++			linux,default-trigger = "off";
++			default-state = "on";
++		};
++
++		led5-r-iso2 {
++			function = LED_FUNCTION_STATUS;
++			color = <LED_COLOR_ID_RED>;
++			gpios = <&pca9535_1 8  GPIO_ACTIVE_LOW>;
++			linux,default-trigger = "off";
++			default-state = "on";
++		};
++
++		led5-g-iso2 {
++			function = LED_FUNCTION_STATUS;
++			color = <LED_COLOR_ID_GREEN>;
++			gpios = <&pca9535_1 9  GPIO_ACTIVE_LOW>;
++			linux,default-trigger = "off";
++			default-state = "on";
++		};
++
++		led5-b-iso2 {
++			function = LED_FUNCTION_STATUS;
++			color = <LED_COLOR_ID_BLUE>;
++			gpios = <&pca9535_1 10  GPIO_ACTIVE_LOW>;
++			linux,default-trigger = "off";
++			default-state = "on";
++		};
++	};
++};
++
++&i2c4 {
++	#address-cells = <1>;
++	#size-cells = <0>;
++
++	pca9535_1: gpio@26 {
++		compatible = "nxp,pca9535";
++		reg = <0x26>;
++		gpio-controller;
++		#gpio-cells = <2>;
++		interrupt-controller;
++		#interruppt-cells = <2>;
++		ngpios = <16>;
++		gpio-line-names =
++			"ntc-ch1-4-iso2", "pt100-ch1-4-iso2", "divider-ch1-4-iso2",
++			"current-ch1-4-iso2", "led1-iso2", "led2-iso2", "led3-iso2",
++			"led4-iso2", "led5-r-iso2", "led5-g-iso2", "led5-b-iso2",
++			"adc-reset-iso2", "adc-drdy-iso2", "mode-select0-iso2",
++			"mode-select1-iso2", "mode-select2-iso2";
++
++		adc-reset-iso2-hog {
++			gpio-hog;
++			gpios = <11 GPIO_ACTIVE_HIGH>;
++			output-high;
++			line-name = "adc-reset-iso2";
++		};
++	};
++
++	pca9535_0: gpio@27 {
++		compatible = "nxp,pca9535";
++		reg = <0x27>;
++		gpio-controller;
++		#gpio-cells = <2>;
++		interrupt-controller;
++		#interruppt-cells = <2>;
++		ngpios = <16>;
++		gpio-line-names =
++			"ntc-ch1-4-iso1", "pt100-ch1-4-iso1", "divider-ch1-4-iso1",
++			"current-ch1-4-iso1", "led1-iso1", "led2-iso1", "led3-iso1",
++			"led4-iso1", "led5-r-iso1", "led5-g-iso1","led5-b-iso1",
++			"adc-reset-iso1", "adc-drdy-iso1", "mode-select0-iso1",
++			"mode-select1-iso1", "mode-select2-iso1";
++
++		adc-reset-iso1-hog {
++			gpio-hog;
++			gpios = <11 GPIO_ACTIVE_HIGH>;
++			output-high;
++			line-name = "adc-reset-iso1";
++		};
++	};
++
++	ads1119_0: adc@41 {
++		compatible = "ti,ads1119";
++		reg = <0x41>;
++		#address-cells = <1>;
++		#size-cells = <0>;
++		interrupt-parent = <&pca9535_0>;
++		interrupts = <12 IRQ_TYPE_EDGE_FALLING>;
++
++		ads1119_0_a0_a1: channel@0 {
++			reg = <0>;
++			ti,gain = <1>;
++			ti,samplerate = <1000>;
++			ti,extref = <1>;
++			ti,refvoltage = <3300000>;
++		};
++
++		ads1119_0_a2_a3: channel@1 {
++			reg = <1>;
++			ti,gain = <1>;
++			ti,samplerate = <1000>;
++			ti,extref = <1>;
++			ti,refvoltage = <3300000>;
++		};
++
++		ads1119_0_a1_a2: channel@2 {
++			reg = <2>;
++			ti,gain = <1>;
++			ti,samplerate = <1000>;
++			ti,extref = <1>;
++			ti,refvoltage = <3300000>;
++		};
++
++		ads1119_0_a0_g: channel@3 {
++			reg = <3>;
++			ti,gain = <1>;
++			ti,samplerate = <1000>;
++			ti,extref = <1>;
++			ti,refvoltage = <3300000>;
++		};
++
++		ads1119_0_a1_g: channel@4 {
++			reg = <4>;
++			ti,gain = <1>;
++			ti,samplerate = <1000>;
++			ti,extref = <1>;
++			ti,refvoltage = <3300000>;
++		};
++
++		ads1119_0_a2_g: channel@5 {
++			reg = <5>;
++			ti,gain = <1>;
++			ti,samplerate = <1000>;
++			ti,extref = <1>;
++			ti,refvoltage = <3300000>;
++		};
++
++		ads1119_0_a3_g: channel@6 {
++			reg = <6>;
++			ti,gain = <1>;
++			ti,samplerate = <1000>;
++			ti,extref = <1>;
++			ti,refvoltage = <3300000>;
++		};
++
++		ads1119_0_short: channel@7 {
++			reg = <7>;
++			ti,gain = <1>;
++			ti,samplerate = <1000>;
++			ti,extref = <1>;
++			ti,refvoltage = <3300000>;
++		};
++	};
++
++	ads1119_1: adc@42 {
++		compatible = "ti,ads1119";
++		reg = <0x42>;
++		#address-cells = <1>;
++		#size-cells = <0>;
++		interrupt-parent = <&pca9535_1>;
++		interrupts = <12 IRQ_TYPE_EDGE_FALLING>;
++
++		ads1119_1_a0_a1: channel@0 {
++			reg = <0>;
++			ti,gain = <1>;
++			ti,samplerate = <1000>;
++			ti,extref = <1>;
++			ti,refvoltage = <3300000>;
++		};
++
++		ads1119_1_a2_a3: channel@1 {
++			reg = <1>;
++			ti,gain = <1>;
++			ti,samplerate = <1000>;
++			ti,extref = <1>;
++			ti,refvoltage = <3300000>;
++		};
++
++		ads1119_1_a1_a2: channel@2 {
++			reg = <2>;
++			ti,gain = <1>;
++			ti,samplerate = <1000>;
++			ti,extref = <1>;
++			ti,refvoltage = <3300000>;
++		};
++
++		ads1119_1_a0_g: channel@3 {
++			reg = <3>;
++			ti,gain = <1>;
++			ti,samplerate = <1000>;
++			ti,extref = <1>;
++			ti,refvoltage = <3300000>;
++		};
++
++		ads1119_1_a1_g: channel@4 {
++			reg = <4>;
++			ti,gain = <1>;
++			ti,samplerate = <1000>;
++			ti,extref = <1>;
++			ti,refvoltage = <3300000>;
++		};
++
++		ads1119_1_a2_g: channel@5 {
++			reg = <5>;
++			ti,gain = <1>;
++			ti,samplerate = <1000>;
++			ti,extref = <1>;
++			ti,refvoltage = <3300000>;
++		};
++
++		ads1119_1_a3_g: channel@6 {
++			reg = <6>;
++			ti,gain = <1>;
++			ti,samplerate = <1000>;
++			ti,extref = <1>;
++			ti,refvoltage = <3300000>;
++		};
++
++		ads1119_1_short: channel@7 {
++			reg = <7>;
++			ti,gain = <1>;
++			ti,samplerate = <1000>;
++			ti,extref = <1>;
++			ti,refvoltage = <3300000>;
++		};
++	};
++};
+diff --git a/arch/arm64/boot/dts/freescale/imx8mm-phygate-tauri-l-rs232-rs232.dtso b/arch/arm64/boot/dts/freescale/imx8mm-phygate-tauri-l-rs232-rs232.dtso
+new file mode 100644
+index 000000000000..f1f38b739ef7
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/imx8mm-phygate-tauri-l-rs232-rs232.dtso
+@@ -0,0 +1,67 @@
++// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
++/*
++ * Copyright (C) 2021 PHYTEC Messtechnik GmbH
++ * Author: Jens Lang <j.lang@phytec.de>
++ *
++ * Tauri-L 2 x RS232:
++ *  - GPIO3_20 uart4_rs485_en needs to be driven low (inactive)
++ */
++
++#include <dt-bindings/clock/imx8mm-clock.h>
++#include <dt-bindings/gpio/gpio.h>
++#include "imx8mm-pinfunc.h"
++
++/dts-v1/;
++/plugin/;
++
++&gpio3 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_gpio3_hog>;
++
++	uart4_rs485_en {
++		gpio-hog;
++		gpios = <20 GPIO_ACTIVE_HIGH>;
++		output-low;
++		line-name = "uart4_rs485_en";
++	};
++};
++
++/* UART2 - RS232  */
++&uart2 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_uart2>;
++	assigned-clocks = <&clk IMX8MM_CLK_UART2>;
++	assigned-clock-parents = <&clk IMX8MM_SYS_PLL1_80M>;
++	status = "okay";
++};
++
++/* UART4 - RS232  */
++&uart4 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_uart4>;
++	assigned-clocks = <&clk IMX8MM_CLK_UART4>;
++	assigned-clock-parents = <&clk IMX8MM_SYS_PLL1_80M>;
++	status = "okay";
++};
++
++&iomuxc {
++	pinctrl_gpio3_hog: gpio3hoggrp {
++		fsl,pins = <
++			MX8MM_IOMUXC_SAI5_RXC_GPIO3_IO20	0x49
++		>;
++	};
++
++	pinctrl_uart2: uart2grp {
++		fsl,pins = <
++			MX8MM_IOMUXC_UART2_RXD_UART2_DCE_RX	0x00
++			MX8MM_IOMUXC_UART2_TXD_UART2_DCE_TX	0x00
++		>;
++	};
++
++	pinctrl_uart4: uart4grp {
++		fsl,pins = <
++			MX8MM_IOMUXC_UART4_RXD_UART4_DCE_RX	0x49
++			MX8MM_IOMUXC_UART4_TXD_UART4_DCE_TX	0x49
++		>;
++	};
++};
+diff --git a/arch/arm64/boot/dts/freescale/imx8mm-phygate-tauri-l-rs232-rs485-switchable.dtso b/arch/arm64/boot/dts/freescale/imx8mm-phygate-tauri-l-rs232-rs485-switchable.dtso
+new file mode 100644
+index 000000000000..2e5a549dd06e
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/imx8mm-phygate-tauri-l-rs232-rs485-switchable.dtso
+@@ -0,0 +1,49 @@
++// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
++/*
++ * Copyright (C) 2021 PHYTEC Messtechnik GmbH
++ * Author: Jens Lang <j.lang@phytec.de>
++ *
++ * Tauri-L RS232 + RS485:
++ *  - GPIO3_20 uart4_rs485_en needs to be driven high (active)
++ *  - GPIO3_25 RS485_DE Driver enable
++ */
++
++#include <dt-bindings/clock/imx8mm-clock.h>
++#include "imx8mm-pinfunc.h"
++
++/dts-v1/;
++/plugin/;
++
++/* UART2 - RS232  */
++&uart2 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_uart2>;
++	assigned-clocks = <&clk IMX8MM_CLK_UART2>;
++	assigned-clock-parents = <&clk IMX8MM_SYS_PLL1_80M>;
++	status = "okay";
++};
++
++/* UART4 - RS232/RS485 switchable  */
++&uart4 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_uart4>;
++	assigned-clocks = <&clk IMX8MM_CLK_UART4>;
++	assigned-clock-parents = <&clk IMX8MM_SYS_PLL1_80M>;
++	status = "okay";
++};
++
++&iomuxc {
++	pinctrl_uart2: uart2grp {
++		fsl,pins = <
++			MX8MM_IOMUXC_UART2_RXD_UART2_DCE_RX	0x00
++			MX8MM_IOMUXC_UART2_TXD_UART2_DCE_TX	0x00
++		>;
++	};
++
++	pinctrl_uart4: uart4grp {
++		fsl,pins = <
++			MX8MM_IOMUXC_UART4_RXD_UART4_DCE_RX	0x49
++			MX8MM_IOMUXC_UART4_TXD_UART4_DCE_TX	0x49
++		>;
++	};
++};
+diff --git a/arch/arm64/boot/dts/freescale/imx8mm-phygate-tauri-l-rs232-rs485.dtso b/arch/arm64/boot/dts/freescale/imx8mm-phygate-tauri-l-rs232-rs485.dtso
+new file mode 100644
+index 000000000000..1d8951e1a47e
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/imx8mm-phygate-tauri-l-rs232-rs485.dtso
+@@ -0,0 +1,71 @@
++// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
++/*
++ * Copyright (C) 2021 PHYTEC Messtechnik GmbH
++ * Author: Jens Lang <j.lang@phytec.de>
++ *
++ * Tauri-L RS232 + RS485:
++ *  - GPIO3_20 uart4_rs485_en needs to be driven high (active)
++ *  - GPIO3_25 RS485_DE Driver enable
++ */
++
++#include <dt-bindings/clock/imx8mm-clock.h>
++#include <dt-bindings/gpio/gpio.h>
++#include "imx8mm-pinfunc.h"
++
++/dts-v1/;
++/plugin/;
++
++&gpio3 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_gpio3_hog>;
++
++	uart4_rs485_en {
++		gpio-hog;
++		gpios = <20 GPIO_ACTIVE_HIGH>;
++		output-high;
++		line-name = "uart4_rs485_en";
++	};
++};
++
++/* UART2 - RS232  */
++&uart2 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_uart2>;
++	assigned-clocks = <&clk IMX8MM_CLK_UART2>;
++	assigned-clock-parents = <&clk IMX8MM_SYS_PLL1_80M>;
++	status = "okay";
++};
++
++/* UART4 - RS485  */
++&uart4 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_uart4>;
++	assigned-clocks = <&clk IMX8MM_CLK_UART4>;
++	assigned-clock-parents = <&clk IMX8MM_SYS_PLL1_80M>;
++	rts-gpios = <&gpio3 25 GPIO_ACTIVE_HIGH>;
++	linux,rs485-enabled-at-boot-time;
++	status = "okay";
++};
++
++&iomuxc {
++	pinctrl_gpio3_hog: gpio3hoggrp {
++		fsl,pins = <
++			MX8MM_IOMUXC_SAI5_RXC_GPIO3_IO20	0x49
++		>;
++	};
++
++	pinctrl_uart2: uart2grp {
++		fsl,pins = <
++			MX8MM_IOMUXC_UART2_RXD_UART2_DCE_RX	0x00
++			MX8MM_IOMUXC_UART2_TXD_UART2_DCE_TX	0x00
++		>;
++	};
++
++	pinctrl_uart4: uart4grp {
++		fsl,pins = <
++			MX8MM_IOMUXC_UART4_RXD_UART4_DCE_RX	0x49
++			MX8MM_IOMUXC_UART4_TXD_UART4_DCE_TX	0x49
++			MX8MM_IOMUXC_SAI5_MCLK_GPIO3_IO25	0x49
++		>;
++	};
++};
+diff --git a/arch/arm64/boot/dts/freescale/imx8mm-phygate-tauri-l-rs232-rts-cts.dtso b/arch/arm64/boot/dts/freescale/imx8mm-phygate-tauri-l-rs232-rts-cts.dtso
+new file mode 100644
+index 000000000000..4719f5fbad03
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/imx8mm-phygate-tauri-l-rs232-rts-cts.dtso
+@@ -0,0 +1,35 @@
++// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
++/*
++ * Copyright (C) 2023 PHYTEC Messtechnik GmbH
++ * Author: Jens Lang <j.lang@phytec.de>
++ *
++ * Tauri-L RS232 with RTS/CTS hardware flow control:
++ *  - UART4_TX becomes RTS
++ *  - UART4_RX becomes CTS
++ */
++
++#include <dt-bindings/clock/imx8mm-clock.h>
++#include "imx8mm-pinfunc.h"
++
++/dts-v1/;
++/plugin/;
++
++&uart2 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_uart2>;
++	assigned-clocks = <&clk IMX8MM_CLK_UART2>;
++	assigned-clock-parents = <&clk IMX8MM_SYS_PLL1_80M>;
++	uart-has-rtscts;
++	status = "okay";
++};
++
++&iomuxc {
++	pinctrl_uart2: uart2grp {
++		fsl,pins = <
++			MX8MM_IOMUXC_UART2_RXD_UART2_DCE_RX	0x00
++			MX8MM_IOMUXC_UART2_TXD_UART2_DCE_TX	0x00
++			MX8MM_IOMUXC_UART4_RXD_UART2_DCE_CTS_B	0x00
++			MX8MM_IOMUXC_UART4_TXD_UART2_DCE_RTS_B	0x00
++		>;
++	};
++};
+diff --git a/arch/arm64/boot/dts/freescale/imx8mm-phygate-tauri-l.dts b/arch/arm64/boot/dts/freescale/imx8mm-phygate-tauri-l.dts
+new file mode 100644
+index 000000000000..f41ddd2792bc
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/imx8mm-phygate-tauri-l.dts
+@@ -0,0 +1,522 @@
++// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
++/*
++ * Copyright (C) 2023 PHYTEC Messtechnik GmbH
++ */
++
++/dts-v1/;
++
++#include <dt-bindings/input/linux-event-codes.h>
++#include <dt-bindings/leds/common.h>
++#include <dt-bindings/phy/phy-imx8-pcie.h>
++#include "imx8mm-phycore-som.dtsi"
++
++/ {
++	model = "PHYTEC phyGATE-Tauri-L-iMX8MM";
++	compatible = "phytec,imx8mm-phygate-tauri-l",
++		     "phytec,imx8mm-phycore-som", "fsl,imx8mm";
++
++	chosen {
++		stdout-path = &uart3;
++	};
++
++	can_osc_40m: clock-can {
++		compatible = "fixed-clock";
++		clock-frequency = <40000000>;
++		clock-output-names = "can_osc_40m";
++		#clock-cells = <0>;
++	};
++
++	display-subsystem {
++		status = "disabled";
++	};
++
++	gpio-keys {
++		compatible = "gpio-keys";
++		pinctrl-names = "default";
++		pinctrl-0 = <&pinctrl_gpiokeys>;
++
++		key {
++			gpios = <&gpio1 9 GPIO_ACTIVE_LOW>;
++			label = "KEY-A";
++			linux,code = <KEY_A>;
++		};
++	};
++
++	leds {
++		compatible = "gpio-leds";
++		pinctrl-names = "default";
++		pinctrl-0 = <&pinctrl_leds>;
++
++		led-1 {
++			color = <LED_COLOR_ID_RED>;
++			gpios = <&gpio5 5 GPIO_ACTIVE_HIGH>;
++			linux,default-trigger = "none";
++		};
++
++		led-2 {
++			color = <LED_COLOR_ID_YELLOW>;
++			gpios = <&gpio4 30 GPIO_ACTIVE_HIGH>;
++			linux,default-trigger = "none";
++		};
++	};
++
++	usdhc1_pwrseq: pwr-seq {
++		compatible = "mmc-pwrseq-simple";
++		post-power-on-delay-ms = <100>;
++		power-off-delay-us = <60>;
++		reset-gpios = <&gpio2 7 GPIO_ACTIVE_LOW>;
++	};
++
++	reg_usb_hub_vbus: regulator-hub-otg1 {
++		compatible = "regulator-fixed";
++		gpio = <&gpio1 14 GPIO_ACTIVE_HIGH>;
++		enable-active-high;
++		pinctrl-names = "default";
++		pinctrl-0 = <&pinctrl_usbhubpwr>;
++		regulator-name = "usb_hub_vbus";
++		regulator-max-microvolt = <5000000>;
++		regulator-min-microvolt = <5000000>;
++	};
++
++	reg_usb_otg1_vbus: regulator-usb-otg1 {
++		compatible = "regulator-fixed";
++		gpio = <&gpio1 12 GPIO_ACTIVE_HIGH>;
++		enable-active-high;
++		pinctrl-names = "default";
++		pinctrl-0 = <&pinctrl_usbotg1pwr>;
++		regulator-name = "usb_otg1_vbus";
++		regulator-max-microvolt = <5000000>;
++		regulator-min-microvolt = <5000000>;
++	};
++
++	reg_usdhc2_vmmc: regulator-usdhc2 {
++		compatible = "regulator-fixed";
++		gpio = <&gpio2 19 GPIO_ACTIVE_HIGH>;
++		enable-active-high;
++		off-on-delay-us = <20000>;
++		pinctrl-names = "default";
++		pinctrl-0 = <&pinctrl_reg_usdhc2_vmmc>;
++		regulator-max-microvolt = <3300000>;
++		regulator-min-microvolt = <3300000>;
++		regulator-name = "VSD_3V3";
++	};
++};
++
++&ecspi1 {
++	cs-gpios = <&gpio5 9 GPIO_ACTIVE_LOW>,
++		   <&gpio5 13 GPIO_ACTIVE_LOW>,
++		   <&gpio5 2 GPIO_ACTIVE_LOW>;
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_ecspi1 &pinctrl_ecspi1_cs>;
++	#address-cells = <1>;
++	#size-cells = <0>;
++	status = "okay";
++
++	/* CAN MCP251XFD */
++	can0: can@0 {
++		compatible = "microchip,mcp251xfd";
++		reg = <0>;
++		clocks = <&can_osc_40m>;
++		interrupts = <8 IRQ_TYPE_LEVEL_LOW>;
++		interrupt-parent = <&gpio1>;
++		pinctrl-names = "default";
++		pinctrl-0 = <&pinctrl_can_int>;
++		spi-max-frequency = <10000000>;
++	};
++
++	tpm: tpm@1 {
++		compatible = "infineon,slb9670", "tcg,tpm_tis-spi";
++		interrupts = <11 IRQ_TYPE_LEVEL_LOW>;
++		interrupt-parent = <&gpio2>;
++		pinctrl-names = "default";
++		pinctrl-0 = <&pinctrl_tpm>;
++		reg = <1>;
++		spi-max-frequency = <38000000>;
++	};
++
++	spidev: spi@2 {
++			compatible = "phytec,kitspi";
++			reg = <2>;
++			spi-max-frequency = <38000000>;
++	};
++};
++
++&i2c2 {
++	clock-frequency = <400000>;
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_i2c2>;
++	pinctrl-1 = <&pinctrl_i2c2_gpio>;
++	scl-gpios = <&gpio5 16 (GPIO_ACTIVE_HIGH | GPIO_OPEN_DRAIN)>;
++	sda-gpios = <&gpio5 17 (GPIO_ACTIVE_HIGH | GPIO_OPEN_DRAIN)>;
++	status = "okay";
++
++	temp_sense0: temperature-sensor@49 {
++		compatible = "ti,tmp102";
++		reg = <0x49>;
++		interrupt-parent = <&gpio4>;
++		interrupts = <31 IRQ_TYPE_LEVEL_LOW>;
++		pinctrl-names = "default";
++		pinctrl-0 = <&pinctrl_tempsense>;
++		#thermal-sensor-cells = <1>;
++	};
++};
++
++&i2c3 {
++	clock-frequency = <400000>;
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_i2c3>;
++	pinctrl-1 = <&pinctrl_i2c3_gpio>;
++	scl-gpios = <&gpio5 18 (GPIO_ACTIVE_HIGH | GPIO_OPEN_DRAIN)>;
++	sda-gpios = <&gpio5 19 (GPIO_ACTIVE_HIGH | GPIO_OPEN_DRAIN)>;
++	status = "okay";
++};
++
++&i2c4 {
++	clock-frequency = <400000>;
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_i2c4>;
++	pinctrl-1 = <&pinctrl_i2c4_gpio>;
++	scl-gpios = <&gpio5 20 (GPIO_ACTIVE_HIGH | GPIO_OPEN_DRAIN)>;
++	sda-gpios = <&gpio5 21 (GPIO_ACTIVE_HIGH | GPIO_OPEN_DRAIN)>;
++	status = "okay";
++};
++
++/* PCIe */
++&pcie0 {
++	assigned-clocks = <&clk IMX8MM_CLK_PCIE1_AUX>,
++			  <&clk IMX8MM_CLK_PCIE1_PHY>,
++			  <&clk IMX8MM_CLK_PCIE1_CTRL>;
++	assigned-clock-parents = <&clk IMX8MM_SYS_PLL2_50M>,
++				 <&clk IMX8MM_SYS_PLL2_100M>,
++				 <&clk IMX8MM_SYS_PLL2_250M>;
++	assigned-clock-rates = <10000000>, <100000000>, <250000000>;
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_pcie>;
++	reset-gpio = <&gpio3 22 GPIO_ACTIVE_LOW>;
++	status = "okay";
++};
++
++&pcie_phy {
++	clocks = <&clk IMX8MM_CLK_PCIE1_PHY>;
++	fsl,clkreq-unsupported;
++	fsl,refclk-pad-mode = <IMX8_PCIE_REFCLK_PAD_OUTPUT>;
++	fsl,tx-deemph-gen1 = <0x2d>;
++	fsl,tx-deemph-gen2 = <0xf>;
++	status = "okay";
++};
++
++&pwm1 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_pwm1>;
++	status = "okay";
++};
++
++&pwm3 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_pwm3>;
++	status = "okay";
++};
++
++&pwm4 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_pwm4>;
++	status = "okay";
++};
++
++/* RTC */
++&rv3028 {
++	interrupt-parent = <&gpio1>;
++	interrupts = <3 IRQ_TYPE_LEVEL_LOW>;
++	pinctrl-0 = <&pinctrl_rtc>;
++	pinctrl-names = "default";
++	aux-voltage-chargeable = <1>;
++	trickle-resistor-ohms = <3000>;
++	wakeup-source;
++};
++
++&uart1 {
++	assigned-clocks = <&clk IMX8MM_CLK_UART1>;
++	assigned-clock-parents = <&clk IMX8MM_SYS_PLL1_80M>;
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_uart1>;
++	status = "okay";
++};
++
++/* UART2 - RS232 */
++&uart2 {
++	assigned-clocks = <&clk IMX8MM_CLK_UART2>;
++	assigned-clock-parents = <&clk IMX8MM_SYS_PLL1_80M>;
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_uart2>;
++	status = "okay";
++};
++
++/* UART - console */
++&uart3 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_uart3>;
++	status = "okay";
++};
++
++/* USB */
++&usbotg1 {
++	adp-disable;
++	dr_mode = "otg";
++	over-current-active-low;
++	samsung,picophy-pre-emp-curr-control = <3>;
++	samsung,picophy-dc-vol-level-adjust = <7>;
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_usbotg1>;
++	srp-disable;
++	vbus-supply = <&reg_usb_otg1_vbus>;
++	status = "okay";
++};
++
++&usbotg2 {
++	disable-over-current;
++	dr_mode = "host";
++	samsung,picophy-pre-emp-curr-control = <3>;
++	samsung,picophy-dc-vol-level-adjust = <7>;
++	vbus-supply = <&reg_usb_hub_vbus>;
++	status = "okay";
++};
++
++/* SD-Card */
++&usdhc2 {
++	assigned-clocks = <&clk IMX8MM_CLK_USDHC2>;
++	assigned-clock-rates = <200000000>;
++	bus-width = <4>;
++	cd-gpios = <&gpio2 12 GPIO_ACTIVE_LOW>;
++	disable-wp;
++	pinctrl-names = "default", "state_100mhz", "state_200mhz";
++	pinctrl-0 = <&pinctrl_usdhc2>, <&pinctrl_usdhc2_gpio>;
++	pinctrl-1 = <&pinctrl_usdhc2_100mhz>, <&pinctrl_usdhc2_gpio>;
++	pinctrl-2 = <&pinctrl_usdhc2_200mhz>, <&pinctrl_usdhc2_gpio>;
++	vmmc-supply = <&reg_usdhc2_vmmc>;
++	vqmmc-supply = <&reg_nvcc_sd2>;
++	fsl,cd-gpio-wakeup-disable;
++	status = "okay";
++};
++
++&iomuxc {
++	pinctrl_can_int: can-intgrp {
++		fsl,pins = <
++			MX8MM_IOMUXC_GPIO1_IO08_GPIO1_IO8	0x00
++		>;
++	};
++
++	pinctrl_ecspi1: ecspi1grp {
++		fsl,pins = <
++			MX8MM_IOMUXC_ECSPI1_MISO_ECSPI1_MISO	0x82
++			MX8MM_IOMUXC_ECSPI1_MOSI_ECSPI1_MOSI	0x82
++			MX8MM_IOMUXC_ECSPI1_SCLK_ECSPI1_SCLK	0x82
++		>;
++	};
++
++	pinctrl_ecspi1_cs: ecspi1csgrp {
++		fsl,pins = <
++			MX8MM_IOMUXC_ECSPI1_SS0_GPIO5_IO9	0x00
++			MX8MM_IOMUXC_ECSPI2_SS0_GPIO5_IO13	0x00
++			MX8MM_IOMUXC_SAI3_MCLK_GPIO5_IO2	0x00
++		>;
++	};
++
++	pinctrl_gpiokeys: keygrp {
++		fsl,pins = <
++			MX8MM_IOMUXC_GPIO1_IO09_GPIO1_IO9	0x00
++		>;
++	};
++
++	pinctrl_i2c2: i2c2grp {
++		fsl,pins = <
++			MX8MM_IOMUXC_I2C2_SCL_I2C2_SCL	0x400001c2
++			MX8MM_IOMUXC_I2C2_SDA_I2C2_SDA	0x400001c2
++		>;
++	};
++
++	pinctrl_i2c2_gpio: i2c2gpiogrp {
++		fsl,pins = <
++			MX8MM_IOMUXC_I2C2_SDA_GPIO5_IO17		0x1e0
++			MX8MM_IOMUXC_I2C2_SCL_GPIO5_IO16		0x1e0
++		>;
++	};
++
++
++	pinctrl_i2c3: i2c3grp {
++		fsl,pins = <
++			MX8MM_IOMUXC_I2C3_SCL_I2C3_SCL	0x400001c2
++			MX8MM_IOMUXC_I2C3_SDA_I2C3_SDA	0x400001c2
++		>;
++	};
++
++	pinctrl_i2c3_gpio: i2c3gpiogrp {
++		fsl,pins = <
++			MX8MM_IOMUXC_I2C3_SDA_GPIO5_IO19		0x1e0
++			MX8MM_IOMUXC_I2C3_SCL_GPIO5_IO18		0x1e0
++		>;
++	};
++
++	pinctrl_i2c4: i2c4grp {
++		fsl,pins = <
++			MX8MM_IOMUXC_I2C4_SCL_I2C4_SCL	0x400001c2
++			MX8MM_IOMUXC_I2C4_SDA_I2C4_SDA	0x400001c2
++		>;
++	};
++
++	pinctrl_i2c4_gpio: i2c4gpiogrp {
++		fsl,pins = <
++			MX8MM_IOMUXC_I2C4_SDA_GPIO5_IO21		0x1e0
++			MX8MM_IOMUXC_I2C4_SCL_GPIO5_IO20		0x1e0
++		>;
++	};
++
++	pinctrl_leds: leds1grp {
++		fsl,pins = <
++			MX8MM_IOMUXC_SAI3_RXD_GPIO4_IO30	0x00
++			MX8MM_IOMUXC_SPDIF_EXT_CLK_GPIO5_IO5	0x00
++		>;
++	};
++
++	pinctrl_pcie: pciegrp {
++		fsl,pins = <
++			/* COEX2 */
++			MX8MM_IOMUXC_SAI5_RXD1_GPIO3_IO22	0x00
++			/* COEX1 */
++			MX8MM_IOMUXC_SAI1_TXD0_GPIO4_IO12	0x12
++		>;
++	};
++
++	pinctrl_pwm1: pwm1grp {
++		fsl,pins = <
++			MX8MM_IOMUXC_GPIO1_IO01_PWM1_OUT	0x40
++		>;
++	};
++
++	pinctrl_pwm3: pwm3grp {
++		fsl,pins = <
++			MX8MM_IOMUXC_SPDIF_TX_PWM3_OUT		0x40
++		>;
++	};
++
++	pinctrl_pwm4: pwm4grp {
++		fsl,pins = <
++			MX8MM_IOMUXC_GPIO1_IO15_PWM4_OUT	0x40
++		>;
++	};
++
++	pinctrl_reg_usdhc2_vmmc: regusdhc2vmmcgrp {
++		fsl,pins = <
++			MX8MM_IOMUXC_SD2_RESET_B_GPIO2_IO19     0x40
++		>;
++	};
++
++	pinctrl_rtc: rtcgrp {
++		fsl,pins = <
++			MX8MM_IOMUXC_GPIO1_IO03_GPIO1_IO3		0x1c0
++		>;
++	};
++
++	pinctrl_tempsense: tempsensegrp {
++		fsl,pins = <
++			MX8MM_IOMUXC_SAI3_TXFS_GPIO4_IO31	0x00
++		>;
++	};
++
++	pinctrl_tpm: tpmgrp {
++		fsl,pins = <
++			MX8MM_IOMUXC_SD1_STROBE_GPIO2_IO11	0x140
++		>;
++	};
++
++	pinctrl_uart1: uart1grp {
++		fsl,pins = <
++			MX8MM_IOMUXC_UART1_TXD_UART1_DCE_TX	0x00
++			MX8MM_IOMUXC_UART1_RXD_UART1_DCE_RX	0x00
++		>;
++	};
++
++	pinctrl_uart2: uart2grp {
++		fsl,pins = <
++			MX8MM_IOMUXC_UART2_TXD_UART2_DCE_TX	0x00
++			MX8MM_IOMUXC_UART2_RXD_UART2_DCE_RX	0x00
++		>;
++	};
++
++	pinctrl_uart3: uart3grp {
++		fsl,pins = <
++			MX8MM_IOMUXC_UART3_RXD_UART3_DCE_RX	0x140
++			MX8MM_IOMUXC_UART3_TXD_UART3_DCE_TX	0x140
++		>;
++	};
++
++	pinctrl_usbhubpwr: usbhubpwrgrp {
++		fsl,pins = <
++			MX8MM_IOMUXC_GPIO1_IO14_GPIO1_IO14	0x00
++		>;
++	};
++
++	pinctrl_usbotg1pwr: usbotg1pwrgrp {
++		fsl,pins = <
++			MX8MM_IOMUXC_GPIO1_IO12_GPIO1_IO12	0x00
++		>;
++	};
++
++	pinctrl_usbotg1: usbotg1grp {
++		fsl,pins = <
++			MX8MM_IOMUXC_GPIO1_IO13_USB1_OTG_OC	0x80
++		>;
++	};
++
++	pinctrl_usdhc1: usdhc1grp {
++		fsl,pins = <
++			MX8MM_IOMUXC_SD1_CLK_USDHC1_CLK		0x182
++			MX8MM_IOMUXC_SD1_CMD_USDHC1_CMD		0xc6
++			MX8MM_IOMUXC_SD1_DATA0_USDHC1_DATA0	0xc6
++			MX8MM_IOMUXC_SD1_DATA1_USDHC1_DATA1	0xc6
++			MX8MM_IOMUXC_SD1_DATA2_USDHC1_DATA2	0xc6
++			MX8MM_IOMUXC_SD1_DATA3_USDHC1_DATA3	0xc6
++		>;
++	};
++
++	pinctrl_usdhc2_gpio: usdhc2gpiogrp {
++		fsl,pins = <
++			MX8MM_IOMUXC_SD2_CD_B_GPIO2_IO12	0x40
++		>;
++	};
++
++	pinctrl_usdhc2: usdhc2grp {
++		fsl,pins = <
++			MX8MM_IOMUXC_GPIO1_IO04_USDHC2_VSELECT	0x1d0
++			MX8MM_IOMUXC_SD2_CLK_USDHC2_CLK		0x192
++			MX8MM_IOMUXC_SD2_CMD_USDHC2_CMD		0x1d2
++			MX8MM_IOMUXC_SD2_DATA0_USDHC2_DATA0	0x1d2
++			MX8MM_IOMUXC_SD2_DATA1_USDHC2_DATA1	0x1d2
++			MX8MM_IOMUXC_SD2_DATA2_USDHC2_DATA2	0x1d2
++			MX8MM_IOMUXC_SD2_DATA3_USDHC2_DATA3	0x1d2
++		>;
++	};
++
++	pinctrl_usdhc2_100mhz: usdhc2100mhzgrp {
++		fsl,pins = <
++			MX8MM_IOMUXC_GPIO1_IO04_USDHC2_VSELECT	0x1d0
++			MX8MM_IOMUXC_SD2_CLK_USDHC2_CLK		0x194
++			MX8MM_IOMUXC_SD2_CMD_USDHC2_CMD		0x1d4
++			MX8MM_IOMUXC_SD2_DATA0_USDHC2_DATA0	0x1d4
++			MX8MM_IOMUXC_SD2_DATA1_USDHC2_DATA1	0x1d4
++			MX8MM_IOMUXC_SD2_DATA2_USDHC2_DATA2	0x1d4
++			MX8MM_IOMUXC_SD2_DATA3_USDHC2_DATA3	0x1d4
++		>;
++	};
++
++	pinctrl_usdhc2_200mhz: usdhc2200mhzgrp {
++		fsl,pins = <
++			MX8MM_IOMUXC_GPIO1_IO04_USDHC2_VSELECT	0x1d0
++			MX8MM_IOMUXC_SD2_CLK_USDHC2_CLK		0x196
++			MX8MM_IOMUXC_SD2_CMD_USDHC2_CMD		0x1d6
++			MX8MM_IOMUXC_SD2_DATA0_USDHC2_DATA0	0x1d6
++			MX8MM_IOMUXC_SD2_DATA1_USDHC2_DATA1	0x1d6
++			MX8MM_IOMUXC_SD2_DATA2_USDHC2_DATA2	0x1d6
++			MX8MM_IOMUXC_SD2_DATA3_USDHC2_DATA3	0x1d6
++		>;
++	};
++};
+-- 
+2.34.1
+

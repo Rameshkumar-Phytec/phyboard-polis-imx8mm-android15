@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright (C) 2025 PHYTEC Embedded Pvt. Ltd.
+  Author: T S Rameshkumar <rameshkumar.t@phytecembedded.in>
+
+  PHYTEC phyBOARD-Polis i.MX8M Mini Android 15 Manifest
+  Target: phyboard_polis (PCM-066 / PCL-069 SOM)
+  Android Release: Android 15.0.0_1.2.0 (Linux Kernel 6.6.58 GKI)
+-->
+<manifest>
+
+  <!-- Include upstream NXP Android 15 release manifest -->
+  <include name="imx-android-15.0.0_1.2.0.xml" />
+
+  <!-- PHYTEC Remote definition pointing to Rameshkumar-Phytec on GitHub -->
+  <remote name="phytec" fetch="https://github.com/Rameshkumar-Phytec" review="" />
+
+  <!-- ========================================================================= -->
+  <!-- PHYTEC phyBOARD-Polis Android 15 Repositories Override                    -->
+  <!-- ========================================================================= -->
+
+  <!-- 1. U-Boot: 2024.04 with 2GB LPDDR4 timings, MMC2 SD boot, Industrial Autoboot -->
+  <remove-project name="uboot-imx" />
+  <project path="vendor/nxp-opensource/uboot-imx"
+           name="uboot-imx"
+           remote="phytec"
+           revision="refs/heads/phytec-android_u-boot-imx8mm-polis-15.0.0_1.2.0" />
+
+  <!-- 2. Linux Kernel: 6.6.58 GKI with SCMI pinctrl, SOM DTSI, phyBOARD-Polis DTS -->
+  <remove-project name="linux-imx" />
+  <project path="vendor/nxp-opensource/kernel_imx"
+           name="linux-imx"
+           remote="phytec"
+           revision="refs/heads/phytec-android_kernel-imx8mm-polis-15.0.0_1.2.0" />
+
+  <!-- 3. Device Tree / Target: phyboard_polis device definitions, makefiles, HALs -->
+  <remove-project name="android-imx_device_fsl" />
+  <project path="device/nxp"
+           name="android-imx_device_fsl"
+           remote="phytec"
+           revision="refs/heads/phytec-android_device-imx8mm-polis-15.0.0_1.2.0">
+    <linkfile src="common/tools/imx-make.sh" dest="imx-make.sh" />
+  </project>
+
+</manifest>

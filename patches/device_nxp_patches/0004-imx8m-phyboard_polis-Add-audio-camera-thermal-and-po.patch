@@ -1,0 +1,742 @@
+From 5d88efdfadb79e08a287efe455abe3ae829bc955 Mon Sep 17 00:00:00 2001
+From: T S Rameshkumar <rameshkumar.t@phytecembedded.in>
+Date: Fri, 9 Oct 2026 18:42:42 +0530
+Subject: [PATCH 4/7] imx8m: phyboard_polis: Add audio, camera, thermal, and
+ powerhint HAL configs Add audio policy XMLs, camera configuration JSONs,
+ powerhint, thermal info configuration, and Bluetooth build headers.
+
+---
+ imx8m/phyboard_polis/audio_effects.xml        |  26 +++
+ .../audio_policy_configuration.xml            | 123 ++++++++++
+ .../bluetooth/bdroid_buildcfg.h               |  34 +++
+ .../phyboard_polis/camera_config_imx8mm.json  |  37 +++
+ .../phyboard_polis/external_camera_config.xml |  31 +++
+ .../le_audio_codec_capabilities.xml           |  73 ++++++
+ imx8m/phyboard_polis/powerhint_imx8mm.json    | 218 ++++++++++++++++++
+ .../thermal_info_config_imx8mm.json           |  59 +++++
+ ...dio_policy_configuration-direct-output.xml |  56 +++++
+ 9 files changed, 657 insertions(+)
+ create mode 100644 imx8m/phyboard_polis/audio_effects.xml
+ create mode 100644 imx8m/phyboard_polis/audio_policy_configuration.xml
+ create mode 100644 imx8m/phyboard_polis/bluetooth/bdroid_buildcfg.h
+ create mode 100644 imx8m/phyboard_polis/camera_config_imx8mm.json
+ create mode 100644 imx8m/phyboard_polis/external_camera_config.xml
+ create mode 100644 imx8m/phyboard_polis/le_audio_codec_capabilities.xml
+ create mode 100644 imx8m/phyboard_polis/powerhint_imx8mm.json
+ create mode 100755 imx8m/phyboard_polis/thermal_info_config_imx8mm.json
+ create mode 100644 imx8m/phyboard_polis/usb_audio_policy_configuration-direct-output.xml
+
+diff --git a/imx8m/phyboard_polis/audio_effects.xml b/imx8m/phyboard_polis/audio_effects.xml
+new file mode 100644
+index 00000000..a1c1fc2a
+--- /dev/null
++++ b/imx8m/phyboard_polis/audio_effects.xml
+@@ -0,0 +1,26 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<audio_effects_conf version="2.0" xmlns="http://schemas.android.com/audio/audio_effects_conf/v2_0">
++    <libraries>
++        <library name="bundle" path="libbundlewrapper.so"/>
++        <library name="reverb" path="libreverbwrapper.so"/>
++        <library name="visualizer" path="libvisualizer.so"/>
++        <library name="downmix" path="libdownmix.so"/>
++        <library name="loudness_enhancer" path="libldnhncr.so"/>
++        <library name="dynamics_processing" path="libdynproc.so"/>
++    </libraries>
++
++    <effects>
++        <effect name="bassboost" library="bundle" uuid="8631f300-72e2-11df-b57e-0002a5d5c51b"/>
++        <effect name="virtualizer" library="bundle" uuid="1d4033c0-8557-11df-9f2d-0002a5d5c51b"/>
++        <effect name="equalizer" library="bundle" uuid="ce772f20-847d-11df-bb17-0002a5d5c51b"/>
++        <effect name="volume" library="bundle" uuid="119341a0-8469-11df-81f9-0002a5d5c51b"/>
++        <effect name="reverb_env_aux" library="reverb" uuid="4a387fc0-8ab3-11df-8bad-0002a5d5c51b"/>
++        <effect name="reverb_env_ins" library="reverb" uuid="c7a511a0-a3bb-11df-860e-0002a5d5c51b"/>
++        <effect name="reverb_pre_aux" library="reverb" uuid="f29a1400-a3bb-11df-8ddc-0002a5d5c51b"/>
++        <effect name="reverb_pre_ins" library="reverb" uuid="172cdf00-a3bc-11df-a72f-0002a5d5c51b"/>
++        <effect name="visualizer" library="visualizer" uuid="d069d9e0-8329-11df-9168-0002a5d5c51b"/>
++        <effect name="downmix" library="downmix" uuid="93f04452-e4fe-41cc-91f9-e475b6d1d69f"/>
++        <effect name="loudness_enhancer" library="loudness_enhancer" uuid="fa415329-2034-4bea-b5dc-5b381c8d1e2c"/>
++        <effect name="dynamics_processing" library="dynamics_processing" uuid="e0e6539b-1781-7261-676f-6d7573696340"/>
++    </effects>
++</audio_effects_conf>
+diff --git a/imx8m/phyboard_polis/audio_policy_configuration.xml b/imx8m/phyboard_polis/audio_policy_configuration.xml
+new file mode 100644
+index 00000000..a625a057
+--- /dev/null
++++ b/imx8m/phyboard_polis/audio_policy_configuration.xml
+@@ -0,0 +1,123 @@
++<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
++<!-- Copyright (C) 2017 The Android Open Source Project
++
++     Licensed under the Apache License, Version 2.0 (the "License");
++     you may not use this file except in compliance with the License.
++     You may obtain a copy of the License at
++
++          http://www.apache.org/licenses/LICENSE-2.0
++
++     Unless required by applicable law or agreed to in writing, software
++     distributed under the License is distributed on an "AS IS" BASIS,
++     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++     See the License for the specific language governing permissions and
++     limitations under the License.
++-->
++
++<audioPolicyConfiguration version="7.0" xmlns:xi="http://www.w3.org/2001/XInclude">
++    <globalConfiguration speaker_drc_enabled="true"/>
++
++    <modules>
++        <module name="primary" halVersion="2.0">
++            <attachedDevices>
++                <item>Speaker</item>
++                <item>Built-In Mic</item>
++            </attachedDevices>
++            <defaultOutputDevice>Speaker</defaultOutputDevice>
++            <mixPorts>
++                <mixPort name="primary output" role="source" flags="AUDIO_OUTPUT_FLAG_PRIMARY">
++                    <profile name="" format="AUDIO_FORMAT_PCM_16_BIT"
++                             samplingRates="48000" channelMasks="AUDIO_CHANNEL_OUT_STEREO"/>
++                </mixPort>
++                <mixPort name="direct output" role="source" flags="AUDIO_OUTPUT_FLAG_DIRECT">
++                    <profile name="" format="AUDIO_FORMAT_PCM_16_BIT"
++                             samplingRates="48000 96000 192000 384000 768000"
++                             channelMasks="AUDIO_CHANNEL_OUT_STEREO AUDIO_CHANNEL_OUT_QUAD AUDIO_CHANNEL_OUT_5POINT1 AUDIO_CHANNEL_OUT_7POINT1"/>
++                </mixPort>
++                <mixPort name="lpa output" role="source" flags="AUDIO_OUTPUT_FLAG_DIRECT AUDIO_OUTPUT_FLAG_HW_AV_SYNC">
++                    <profile name="" format="AUDIO_FORMAT_PCM_16_BIT"
++                             samplingRates="48000"
++                             channelMasks="AUDIO_CHANNEL_OUT_STEREO"/>
++                </mixPort>
++                <mixPort name="hi-res output" role="source" flags="AUDIO_OUTPUT_FLAG_DIRECT AUDIO_OUTPUT_FLAG_HW_AV_SYNC">
++                    <profile name="" format="AUDIO_FORMAT_PCM_24_BIT_PACKED"
++                             samplingRates="48000 96000 192000 384000 768000"
++                             channelMasks="AUDIO_CHANNEL_OUT_STEREO AUDIO_CHANNEL_OUT_QUAD AUDIO_CHANNEL_OUT_5POINT1 AUDIO_CHANNEL_OUT_7POINT1"/>
++                    <profile name="" format="AUDIO_FORMAT_PCM_32_BIT"
++                             samplingRates="48000 96000 192000 384000 768000"
++                             channelMasks="AUDIO_CHANNEL_OUT_STEREO AUDIO_CHANNEL_OUT_QUAD AUDIO_CHANNEL_OUT_5POINT1 AUDIO_CHANNEL_OUT_7POINT1"/>
++                </mixPort>
++                <mixPort name="dsd output" role="source" flags="AUDIO_OUTPUT_FLAG_DIRECT AUDIO_OUTPUT_FLAG_COMPRESS_OFFLOAD">
++                    <profile name="" format="AUDIO_FORMAT_DSD"
++                             samplingRates="2822400 5644800 11289600 22579200" channelMasks="AUDIO_CHANNEL_OUT_STEREO"/>
++                </mixPort>
++                <mixPort name="bt sco output" role="source">
++                    <profile name="" format="AUDIO_FORMAT_PCM_16_BIT"
++                             samplingRates="16000" channelMasks="AUDIO_CHANNEL_OUT_STEREO"/>
++                </mixPort>
++
++                <mixPort name="primary input" role="sink">
++                    <profile name="" format="AUDIO_FORMAT_PCM_16_BIT"
++                             samplingRates="16000 44100 48000"
++                             channelMasks="AUDIO_CHANNEL_IN_MONO AUDIO_CHANNEL_IN_STEREO"/>
++                </mixPort>
++                <mixPort name="bt sco input" role="sink">
++                    <profile name="" format="AUDIO_FORMAT_PCM_16_BIT"
++                             samplingRates="16000" channelMasks="AUDIO_CHANNEL_IN_STEREO"/>
++                </mixPort>
++            </mixPorts>
++            <devicePorts>
++                <devicePort tagName="Speaker" type="AUDIO_DEVICE_OUT_SPEAKER" role="sink" >
++                </devicePort>
++                <devicePort tagName="Wired Headphones" type="AUDIO_DEVICE_OUT_WIRED_HEADPHONE" role="sink">
++                </devicePort>
++                <devicePort tagName="Line-Out" type="AUDIO_DEVICE_OUT_LINE" role="sink">
++                </devicePort>
++                <devicePort tagName="BT SCO Headset" type="AUDIO_DEVICE_OUT_BLUETOOTH_SCO_HEADSET" role="sink">
++                </devicePort>
++                <devicePort tagName="BT SCO CarKit" type="AUDIO_DEVICE_OUT_BLUETOOTH_SCO_CARKIT" role="sink">
++                </devicePort>
++                <devicePort tagName="BT SCO" type="AUDIO_DEVICE_OUT_BLUETOOTH_SCO" role="sink">
++                </devicePort>
++
++                <devicePort tagName="Built-In Mic" type="AUDIO_DEVICE_IN_BUILTIN_MIC" role="source">
++                </devicePort>
++                <devicePort tagName="BT SCO Headset Mic" type="AUDIO_DEVICE_IN_BLUETOOTH_SCO_HEADSET" role="source">
++                </devicePort>
++            </devicePorts>
++            <routes>
++                <route type="mix" sink="Speaker"
++                       sources="primary output"/>
++                <route type="mix" sink="Wired Headphones"
++                       sources="dsd output,hi-res output,direct output,primary output"/>
++                <route type="mix" sink="Line-Out"
++                       sources="dsd output,lpa output,primary output"/>
++                 <route type="mix" sink="BT SCO Headset"
++                        sources="bt sco output"/>
++                <route type="mix" sink="BT SCO CarKit"
++                       sources="bt sco output"/>
++                <route type="mix" sink="BT SCO"
++                       sources="bt sco output"/>
++
++                <route type="mix" sink="primary input"
++                       sources="Built-In Mic"/>
++                <route type="mix" sink="bt sco input"
++                       sources="BT SCO Headset Mic"/>
++            </routes>
++        </module>
++
++        <!-- Bluetooth Audio HAL -->
++        <xi:include href="bluetooth_with_le_audio_policy_configuration_7_0.xml"/>
++        <!-- Usb Audio HAL -->
++        <xi:include href="usb_audio_policy_configuration.xml"/>
++
++        <!-- Remote Submix Audio HAL -->
++        <xi:include href="r_submix_audio_policy_configuration.xml"/>
++
++    </modules>
++
++    <!-- Volume section -->
++    <xi:include href="audio_policy_volumes.xml"/>
++    <xi:include href="default_volume_tables.xml"/>
++
++</audioPolicyConfiguration>
+diff --git a/imx8m/phyboard_polis/bluetooth/bdroid_buildcfg.h b/imx8m/phyboard_polis/bluetooth/bdroid_buildcfg.h
+new file mode 100644
+index 00000000..606e9abb
+--- /dev/null
++++ b/imx8m/phyboard_polis/bluetooth/bdroid_buildcfg.h
+@@ -0,0 +1,34 @@
++/*
++ * Copyright (C) 2012 The Android Open Source Project
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *      http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++
++/* Copyright (C) 2015-2016 Freescale Semiconductor, Inc. */
++/* Copyright 2017-2018 NXP */
++
++#ifndef _BDROID_BUILDCFG_H
++#define _BDROID_BUILDCFG_H
++
++#define BTM_DEF_LOCAL_NAME "iMX8"
++
++// Disables Interleave scan
++#define BTA_HOST_INTERLEAVE_SEARCH  FALSE
++// skips conn update at conn completion
++#define BTA_BLE_SKIP_CONN_UPD  TRUE
++// Disables read remote device feature
++#define BTA_SKIP_BLE_READ_REMOTE_FEAT TRUE
++
++//Enable A2DPSink AVRCPController
++#define BTA_AV_SINK_INCLUDED TRUE
++#endif
+diff --git a/imx8m/phyboard_polis/camera_config_imx8mm.json b/imx8m/phyboard_polis/camera_config_imx8mm.json
+new file mode 100644
+index 00000000..024162ee
+--- /dev/null
++++ b/imx8m/phyboard_polis/camera_config_imx8mm.json
+@@ -0,0 +1,37 @@
++{
++  "__readme": [
++    "Basic Camera HAL v3 configuration."
++  ],
++
++  "hal_version": "3",
++  "cam_blit_copy": "GPU_2D",
++  "cam_blit_csc": "GPU_2D",
++
++  "camera_metadata": [
++    {
++      "camera_type": "back",
++      "camera_name": "mx6s-csi",
++      "bus_info": "platform:32e20000.csi1_bridge",
++      "orientation": "0",
++      "buffer_type": "mmap",
++      "ActiveArrayWidth": "2592",
++      "ActiveArrayHeight": "1944",
++      "PixelArrayWidth": "2592",
++      "PixelArrayHeight": "1944",
++      "PhysicalWidth": "3.6288",
++      "PhysicalHeight": "2.7216",
++      "FocalLength": "3.37",
++      "MaxJpegSize": "8388608",
++      "MinFrameDuration": "33333333",
++      "MaxFrameDuration": "300000000",
++      "MinFrameDurationBlob5M": "1500000000",
++      "OmitFrame": [
++          {
++              "width": "2592",
++              "height": "1944",
++              "omit_num": "2"
++          }
++      ]
++    }
++  ]
++}
+diff --git a/imx8m/phyboard_polis/external_camera_config.xml b/imx8m/phyboard_polis/external_camera_config.xml
+new file mode 100644
+index 00000000..81fe3e88
+--- /dev/null
++++ b/imx8m/phyboard_polis/external_camera_config.xml
+@@ -0,0 +1,31 @@
++<ExternalCamera>
++    <Provider>
++        <ignore>
++            <!-- Internal video devices to be ignored by external camera HAL -->
++            <!-- No leading/trailing spaces -->
++            <!-- <id>0</id>  -->
++        </ignore>
++    </Provider>
++    <!-- See ExternalCameraUtils.cpp for default values of Device configurations below -->
++    <Device>
++        <!-- Max JPEG buffer size in bytes-->
++        <MaxJpegBufferSize bytes="3145728"/>
++        <!-- Size of v4l2 buffer queue when streaming >= 30fps -->
++        <!-- Larger value: more request can be cached pipeline (less janky)  -->
++        <!-- Smaller value: use less memory -->
++        <NumVideoBuffers count="4"/>
++        <!-- Size of v4l2 buffer queue when streaming < 30fps -->
++        <NumStillBuffers count="2"/>
++
++        <!-- List of maximum fps for various output sizes -->
++        <!-- Any image size smaller than the size listed in Limit row will report
++            fps (as minimum frame duration) up to the fpsBound value. -->
++        <FpsList>
++            <!-- width/height must be increasing, fpsBound must be decreasing-->
++            <Limit width="640" height="480" fpsBound="60.0"/>
++            <Limit width="1280" height="720" fpsBound="30.0"/>
++            <Limit width="1920" height="1080" fpsBound="30.0"/>
++            <!-- image size larger than the last entry will not be supported-->
++        </FpsList>
++    </Device>
++</ExternalCamera>
+diff --git a/imx8m/phyboard_polis/le_audio_codec_capabilities.xml b/imx8m/phyboard_polis/le_audio_codec_capabilities.xml
+new file mode 100644
+index 00000000..a836273a
+--- /dev/null
++++ b/imx8m/phyboard_polis/le_audio_codec_capabilities.xml
+@@ -0,0 +1,73 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<!---
++  This is an example to configure LE Audio hardware offload supported capability settings
++  codecConfigurationList:
++    Supported codec capability along with its parameter setting
++
++  strategyConfigurationList:
++     ASE Configuration strategies
++
++  configurationList:
++    For each configuration, there are two attributes
++      - codecConfiguration
++      - strategyConfiguration
++
++  scenarioList:
++    There would be only one `scenarios` group
++    For each scenario, the are two attributes
++      - encode
++      - decode
++    If a scenario is unidirectional, mark another direction as `invalid`
++    The configuration should be chosen from `configurationList`
++-->
++<leAudioOffloadSetting>
++  <scenarioList>
++    <!-- encode only -->
++    <scenario encode="OneChanMono_16_1" decode="invalid"/>
++    <scenario encode="TwoChanStereo_16_1" decode="invalid"/>
++    <scenario encode="OneChanStereo_16_1" decode="invalid"/>
++    <scenario encode="OneChanMono_16_2" decode="invalid"/>
++    <scenario encode="TwoChanStereo_16_2" decode="invalid"/>
++    <scenario encode="OneChanStereo_16_2" decode="invalid"/>
++    <scenario encode="OneChanMono_24_2" decode="invalid"/>
++    <scenario encode="TwoChanStereo_24_2" decode="invalid"/>
++    <scenario encode="OneChanStereo_24_2" decode="invalid"/>
++    <scenario encode="OneChanMono_48_4" decode="invalid"/>
++    <scenario encode="TwoChanStereo_48_4" decode="invalid"/>
++    <scenario encode="OneChanStereo_48_4" decode="invalid"/>
++    <!-- encode and decode -->
++    <scenario encode="OneChanStereo_16_1" decode="OneChanStereo_16_1"/>
++    <scenario encode="OneChanStereo_16_1" decode="OneChanMono_16_1"/>
++    <scenario encode="TwoChanStereo_16_1" decode="OneChanMono_16_1"/>
++    <scenario encode="OneChanMono_16_1" decode="OneChanMono_16_1"/>
++    <scenario encode="OneChanStereo_16_2" decode="OneChanStereo_16_2"/>
++    <scenario encode="OneChanStereo_16_2" decode="OneChanMono_16_2"/>
++    <scenario encode="TwoChanStereo_16_2" decode="OneChanMono_16_2"/>
++    <scenario encode="OneChanMono_16_2" decode="OneChanMono_16_2"/>
++  </scenarioList>
++  <configurationList>
++    <configuration name="OneChanMono_16_1" codecConfiguration="LC3_16k_1" strategyConfiguration="MONO_ONE_CIS_PER_DEVICE"/>
++    <configuration name="TwoChanStereo_16_1" codecConfiguration="LC3_16k_1" strategyConfiguration="STEREO_TWO_CISES_PER_DEVICE"/>
++    <configuration name="OneChanStereo_16_1" codecConfiguration="LC3_16k_1" strategyConfiguration="STEREO_ONE_CIS_PER_DEVICE"/>
++    <configuration name="OneChanMono_16_2" codecConfiguration="LC3_16k_2" strategyConfiguration="MONO_ONE_CIS_PER_DEVICE"/>
++    <configuration name="TwoChanStereo_16_2" codecConfiguration="LC3_16k_2" strategyConfiguration="STEREO_TWO_CISES_PER_DEVICE"/>
++    <configuration name="OneChanStereo_16_2" codecConfiguration="LC3_16k_2" strategyConfiguration="STEREO_ONE_CIS_PER_DEVICE"/>
++    <configuration name="OneChanMono_24_2" codecConfiguration="LC3_24k_2" strategyConfiguration="MONO_ONE_CIS_PER_DEVICE"/>
++    <configuration name="TwoChanStereo_24_2" codecConfiguration="LC3_24k_2" strategyConfiguration="STEREO_TWO_CISES_PER_DEVICE"/>
++    <configuration name="OneChanStereo_24_2" codecConfiguration="LC3_24k_2" strategyConfiguration="STEREO_ONE_CIS_PER_DEVICE"/>
++    <configuration name="OneChanMono_48_4" codecConfiguration="LC3_48k_4" strategyConfiguration="MONO_ONE_CIS_PER_DEVICE"/>
++    <configuration name="TwoChanStereo_48_4" codecConfiguration="LC3_48k_4" strategyConfiguration="STEREO_TWO_CISES_PER_DEVICE"/>
++    <configuration name="OneChanStereo_48_4" codecConfiguration="LC3_48k_4" strategyConfiguration="STEREO_ONE_CIS_PER_DEVICE"/>
++  </configurationList>
++  <codecConfigurationList>
++    <codecConfiguration name="LC3_16k_1" codec="LC3" samplingFrequency="16000" frameDurationUs="7500" octetsPerCodecFrame="30"/>
++    <codecConfiguration name="LC3_16k_2" codec="LC3" samplingFrequency="16000" frameDurationUs="10000" octetsPerCodecFrame="40"/>
++    <codecConfiguration name="LC3_24k_2" codec="LC3" samplingFrequency="24000" frameDurationUs="10000" octetsPerCodecFrame="60"/>
++    <codecConfiguration name="LC3_48k_4" codec="LC3" samplingFrequency="48000" frameDurationUs="10000" octetsPerCodecFrame="120"/>
++  </codecConfigurationList>
++  <strategyConfigurationList>
++    <strategyConfiguration name="STEREO_ONE_CIS_PER_DEVICE" audioLocation="STEREO" connectedDevice="2" channelCount="1"/>
++    <strategyConfiguration name="STEREO_TWO_CISES_PER_DEVICE" audioLocation="STEREO" connectedDevice="1" channelCount="2"/>
++    <strategyConfiguration name="MONO_ONE_CIS_PER_DEVICE" audioLocation="MONO" connectedDevice="1" channelCount="1"/>
++  </strategyConfigurationList>
++</leAudioOffloadSetting>
+diff --git a/imx8m/phyboard_polis/powerhint_imx8mm.json b/imx8m/phyboard_polis/powerhint_imx8mm.json
+new file mode 100644
+index 00000000..edb5a376
+--- /dev/null
++++ b/imx8m/phyboard_polis/powerhint_imx8mm.json
+@@ -0,0 +1,218 @@
++{
++  "Nodes": [
++    {
++      "Name": "CPULittleClusterMaxFreq",
++      "Path": "/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq",
++      "Values": [
++        "1800000",
++        "1600000",
++        "1200000"
++      ],
++      "DefaultIndex": 0,
++      "ResetOnInit": true
++    },
++    {
++      "Name": "CPULittleClusterMinFreq",
++      "Path": "/sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq",
++      "Values": [
++        "1800000",
++        "1600000",
++        "1200000"
++      ],
++      "ResetOnInit": true
++    },
++    {
++      "Name": "TASchedtuneBoost",
++      "Path": "/dev/cpuctl/top-app/cpu.uclamp.min",
++      "Values": [
++        "60",
++        "10"
++      ],
++      "DefaultIndex": 1,
++      "ResetOnInit": true
++    },
++    {
++      "Name": "PMQoSCpuDmaLatency",
++      "Path": "/dev/cpu_dma_latency",
++      "Values": [
++        "0",
++        "3000"
++      ],
++      "DefaultIndex": 1,
++      "HoldFd": true
++    },
++    {
++      "Name": "PowerHALMainState",
++      "Path": "vendor.powerhal.state",
++      "Values": [
++        "SUSTAINED_PERFORMANCE",
++        ""
++      ],
++      "Type": "Property"
++    },
++    {
++      "Name": "PowerHALAudioState",
++      "Path": "vendor.powerhal.audio",
++      "Values": [
++        "AUDIO_STREAMING_LOW_LATENCY",
++        ""
++      ],
++      "Type": "Property"
++    },
++    {
++      "Name": "PowerHALRenderingState",
++      "Path": "vendor.powerhal.rendering",
++      "Values": [
++        "EXPENSIVE_RENDERING",
++        ""
++      ],
++      "Type": "Property"
++    }
++  ],
++  "Actions": [
++    {
++      "PowerHint": "SUSTAINED_PERFORMANCE",
++      "Node": "PowerHALMainState",
++      "Duration": 0,
++      "Value": "SUSTAINED_PERFORMANCE"
++    },
++    {
++      "PowerHint": "SUSTAINED_PERFORMANCE",
++      "Node": "CPULittleClusterMaxFreq",
++      "Duration": 0,
++      "Value": "1600000"
++    },
++    {
++      "PowerHint": "INTERACTION",
++      "Node": "CPULittleClusterMinFreq",
++      "Duration": 0,
++      "Value": "1800000"
++    },
++    {
++      "PowerHint": "INTERACTION",
++      "Node": "TASchedtuneBoost",
++      "Duration": 0,
++      "Value": "60"
++    },
++    {
++      "PowerHint": "INTERACTION",
++      "Node": "PMQoSCpuDmaLatency",
++      "Duration": 500,
++      "Value": "0"
++    },
++    {
++      "PowerHint": "BOOSTWIDEVINE",
++      "Node": "CPULittleClusterMinFreq",
++      "Duration": 0,
++      "Value": "1800000"
++    },
++    {
++      "PowerHint": "BOOSTWIDEVINE",
++      "Node": "PMQoSCpuDmaLatency",
++      "Duration": 500,
++      "Value": "0"
++    },
++    {
++      "PowerHint": "LAUNCH",
++      "Node": "CPULittleClusterMinFreq",
++      "Duration": 5000,
++      "Value": "1800000"
++    },
++    {
++      "PowerHint": "LAUNCH",
++      "Node": "CPULittleClusterMaxFreq",
++      "Duration": 5000,
++      "Value": "1800000"
++    },
++    {
++      "PowerHint": "LAUNCH",
++      "Node": "PMQoSCpuDmaLatency",
++      "Duration": 5000,
++      "Value": "0"
++    },
++    {
++      "PowerHint": "CAMERA_LAUNCH",
++      "Node": "CPULittleClusterMinFreq",
++      "Duration": 5000,
++      "Value": "1800000"
++    },
++    {
++      "PowerHint": "CAMERA_LAUNCH",
++      "Node": "CPULittleClusterMaxFreq",
++      "Duration": 5000,
++      "Value": "1800000"
++    },
++    {
++      "PowerHint": "CAMERA_LAUNCH",
++      "Node": "PMQoSCpuDmaLatency",
++      "Duration": 1000,
++      "Value": "0"
++    },
++    {
++      "PowerHint": "CAMERA_STREAMING_MID",
++      "Node": "CPULittleClusterMaxFreq",
++      "Duration": 0,
++      "Value": "1600000"
++    },
++    {
++      "PowerHint": "CAMERA_SHOT",
++      "Node": "CPULittleClusterMinFreq",
++      "Duration": 5000,
++      "Value": "1800000"
++    },
++    {
++      "PowerHint": "CAMERA_SHOT",
++      "Node": "CPULittleClusterMaxFreq",
++      "Duration": 5000,
++      "Value": "1800000"
++    },
++    {
++      "PowerHint": "CAMERA_SHOT",
++      "Node": "PMQoSCpuDmaLatency",
++      "Duration": 1000,
++      "Value": "0"
++    },
++    {
++      "PowerHint": "AUDIO_LAUNCH",
++      "Node": "PMQoSCpuDmaLatency",
++      "Duration": 0,
++      "Value": "0"
++    },
++    {
++      "PowerHint": "LOW_POWER",
++      "Node": "CPULittleClusterMinFreq",
++      "Duration": 0,
++      "Value": "1200000"
++    },
++    {
++      "PowerHint": "LOW_POWER",
++      "Node": "CPULittleClusterMaxFreq",
++      "Duration": 0,
++      "Value": "1600000"
++    },
++    {
++      "PowerHint": "AUDIO_STREAMING_LOW_LATENCY",
++      "Node": "PowerHALAudioState",
++      "Duration": 0,
++      "Value": "AUDIO_STREAMING_LOW_LATENCY"
++    },
++    {
++      "PowerHint": "AUDIO_STREAMING_LOW_LATENCY",
++      "Node": "PMQoSCpuDmaLatency",
++      "Duration": 0,
++      "Value": "0"
++    },
++    {
++      "PowerHint": "FIXED_PERFORMANCE",
++      "Node": "CPULittleClusterMaxFreq",
++      "Duration": 0,
++      "Value": "1600000"
++    },
++    {
++      "PowerHint": "FIXED_PERFORMANCE",
++      "Node": "CPULittleClusterMinFreq",
++      "Duration": 0,
++      "Value": "1600000"
++    }
++  ]
++}
+diff --git a/imx8m/phyboard_polis/thermal_info_config_imx8mm.json b/imx8m/phyboard_polis/thermal_info_config_imx8mm.json
+new file mode 100755
+index 00000000..7e3da99e
+--- /dev/null
++++ b/imx8m/phyboard_polis/thermal_info_config_imx8mm.json
+@@ -0,0 +1,59 @@
++{
++    "HotplugCPUs":[
++            "cpu2",
++            "cpu3"
++    ],
++    "Sensors":[
++        {
++            "Name":"cpu-thermal",
++            "Type":"CPU",
++            "HotThreshold":[
++                "NAN",
++                80.0,
++                82.0,
++                86.0,
++                88.0,
++                "NAN",
++                90.0
++            ],
++            "HotHysteresis":[
++                2.0,
++                2.0,
++                2.0,
++                2.0,
++                2.0,
++                2.0,
++                2.0
++            ],
++            "VrThreshold":"NAN",
++            "Multiplier":0.001,
++            "Monitor":true
++        },
++        {
++            "Name":"battery",
++            "Type":"BATTERY",
++            "HotThreshold":[
++                "NAN",
++                "NAN",
++                "NAN",
++                "NAN",
++                "NAN",
++                "NAN",
++                100.0
++            ],
++            "VrThreshold":"NAN",
++            "Multiplier":0.001,
++            "Monitor":true
++        }
++    ],
++    "CoolingDevices":[
++        {
++            "Name":"thermal-gpufreq-0",
++            "Type":"GPU"
++        },
++        {
++            "Name":"cpufreq-cpu0",
++            "Type":"CPU"
++        }
++    ]
++}
+diff --git a/imx8m/phyboard_polis/usb_audio_policy_configuration-direct-output.xml b/imx8m/phyboard_polis/usb_audio_policy_configuration-direct-output.xml
+new file mode 100644
+index 00000000..b826785a
+--- /dev/null
++++ b/imx8m/phyboard_polis/usb_audio_policy_configuration-direct-output.xml
+@@ -0,0 +1,56 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<!-- Copyright (C) 2019 The Android Open Source Project
++     Copyright 2019 NXP
++
++     Licensed under the Apache License, Version 2.0 (the "License");
++     you may not use this file except in compliance with the License.
++     You may obtain a copy of the License at
++
++          http://www.apache.org/licenses/LICENSE-2.0
++
++     Unless required by applicable law or agreed to in writing, software
++     distributed under the License is distributed on an "AS IS" BASIS,
++     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++     See the License for the specific language governing permissions and
++     limitations under the License.
++-->
++<!-- USB Audio HAL Audio Policy Configuration file -->
++
++<module name="usb" halVersion="2.0">
++    <mixPorts>
++        <mixPort name="usb_accessory output" role="source">
++            <profile name="" format="AUDIO_FORMAT_PCM_16_BIT"
++                     samplingRates="44100" channelMasks="AUDIO_CHANNEL_OUT_STEREO"/>
++        </mixPort>
++        <mixPort name="direct output" role="source" flags="AUDIO_OUTPUT_FLAG_DIRECT">
++            <profile name="" format="AUDIO_FORMAT_PCM_16_BIT"
++                     samplingRates="384000" channelMasks="AUDIO_CHANNEL_OUT_STEREO"/>
++        </mixPort>
++        <mixPort name="usb_device output" role="source"/>
++        <mixPort name="usb_device input" role="sink"/>
++    </mixPorts>
++    <devicePorts>
++        <devicePort tagName="USB Host Out" type="AUDIO_DEVICE_OUT_USB_ACCESSORY" role="sink">
++            <profile name="" format="AUDIO_FORMAT_PCM_16_BIT"
++                     samplingRates="44100" channelMasks="AUDIO_CHANNEL_OUT_STEREO"/>
++        </devicePort>
++        <devicePort tagName="USB Device Out" type="AUDIO_DEVICE_OUT_USB_DEVICE" role="sink"/>
++        <devicePort tagName="USB Headset Out" type="AUDIO_DEVICE_OUT_USB_HEADSET" role="sink"/>
++        <devicePort tagName="USB Device In" type="AUDIO_DEVICE_IN_USB_DEVICE" role="source"/>
++        <devicePort tagName="USB Headset In" type="AUDIO_DEVICE_IN_USB_HEADSET" role="source"/>
++    </devicePorts>
++    <routes>
++        <route type="mix" sink="USB Host Out"
++               sources="usb_accessory output"/>
++        <route type="mix" sink="USB Device Out"
++               sources="usb_device output"/>
++        <route type="mix" sink="USB Headset Out"
++               sources="usb_device output"/>
++        <route type="mix" sink="usb_device input"
++               sources="USB Device In,USB Headset In"/>
++        <route type="mix" sink="USB Device Out"
++               sources="direct output"/>
++        <route type="mix" sink="USB Headset Out"
++               sources="direct output"/>
++    </routes>
++</module>
+-- 
+2.34.1
+

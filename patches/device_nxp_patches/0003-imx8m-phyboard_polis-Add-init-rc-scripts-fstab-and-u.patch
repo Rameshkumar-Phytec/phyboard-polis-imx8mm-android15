@@ -1,0 +1,525 @@
+From 40a668fe6b6c830503f4faf2115ce55a822f6264 Mon Sep 17 00:00:00 2001
+From: T S Rameshkumar <rameshkumar.t@phytecembedded.in>
+Date: Fri, 9 Oct 2026 18:42:11 +0530
+Subject: [PATCH 3/7] imx8m: phyboard_polis: Add init rc scripts, fstab, and
+ ueventd rules Add fstab.nxp for partition mounting, RAM-specific init.rc
+ scripts, USB device rules, and ueventd configuration for i.MX8MM.
+
+---
+ imx8m/phyboard_polis/early.init.cfg        |   2 +
+ imx8m/phyboard_polis/fstab.nxp             |  18 ++
+ imx8m/phyboard_polis/init.imx8mm.ddr4.rc   |   7 +
+ imx8m/phyboard_polis/init.imx8mm.lpddr4.rc |   5 +
+ imx8m/phyboard_polis/init.imx8mm.rc        |  50 +++++
+ imx8m/phyboard_polis/init.rc               | 226 +++++++++++++++++++++
+ imx8m/phyboard_polis/init.recovery.nxp.rc  |   8 +
+ imx8m/phyboard_polis/init.usb.rc           |  95 +++++++++
+ imx8m/phyboard_polis/ueventd.nxp.rc        |  29 +++
+ 9 files changed, 440 insertions(+)
+ create mode 100644 imx8m/phyboard_polis/early.init.cfg
+ create mode 100644 imx8m/phyboard_polis/fstab.nxp
+ create mode 100644 imx8m/phyboard_polis/init.imx8mm.ddr4.rc
+ create mode 100644 imx8m/phyboard_polis/init.imx8mm.lpddr4.rc
+ create mode 100755 imx8m/phyboard_polis/init.imx8mm.rc
+ create mode 100644 imx8m/phyboard_polis/init.rc
+ create mode 100644 imx8m/phyboard_polis/init.recovery.nxp.rc
+ create mode 100644 imx8m/phyboard_polis/init.usb.rc
+ create mode 100644 imx8m/phyboard_polis/ueventd.nxp.rc
+
+diff --git a/imx8m/phyboard_polis/early.init.cfg b/imx8m/phyboard_polis/early.init.cfg
+new file mode 100644
+index 00000000..9dd16032
+--- /dev/null
++++ b/imx8m/phyboard_polis/early.init.cfg
+@@ -0,0 +1,2 @@
++# support insmod xx.ko; setprop xx xx; modeprobe
++modprobe
+diff --git a/imx8m/phyboard_polis/fstab.nxp b/imx8m/phyboard_polis/fstab.nxp
+new file mode 100644
+index 00000000..b181941c
+--- /dev/null
++++ b/imx8m/phyboard_polis/fstab.nxp
+@@ -0,0 +1,18 @@
++# Android fstab file.
++#<src>                                                  <mnt_point>         <type>    <mnt_flags and options>                       <fs_mgr_flags>
++# The filesystem that contains the filesystem checker binary (typically /system) cannot
++# specify MF_CHECK, and must come before any filesystems that do specify MF_CHECK
++
++/devices/platform/soc@0/32c00000.bus/32e40000.usb/* auto auto defaults voldmanaged=usb:auto
++/dev/block/by-name/userdata    /data        f2fs    nodev,noatime,nosuid,inlinecrypt,reserve_root=32768 latemount,wait,check,quota,formattable,fileencryption=aes-256-xts,fscompress,keydirectory=/metadata/vold/metadata_encryption,checkpoint=fs
++/dev/block/by-name/metadata    /metadata    f2fs    noatime,nosuid,nodev,discard,sync,fsync_mode=nobarrier                           wait,formattable,first_stage_mount,check
++/dev/block/by-name/misc        /misc        emmc    defaults                                                                         defaults
++/dev/block/zram0 none swap defaults zramsize=629145600
++
++system                         /system       erofs ro                                                              wait,slotselect,avb,avb_keys=/avb,logical,first_stage_mount
++system                         /system       ext4  noatime,errors=panic,ro,barrier=1,inode_readahead_blks=8        wait,slotselect,avb,avb_keys=/avb,logical,first_stage_mount
++system_dlkm                    /system_dlkm  erofs ro                                                              wait,slotselect,avb,logical,first_stage_mount
++system_ext                     /system_ext   erofs ro                                                              wait,slotselect,avb,logical,first_stage_mount
++vendor                         /vendor       erofs ro                                                              wait,slotselect,avb,logical,first_stage_mount
++vendor_dlkm                    /vendor_dlkm  erofs ro                                                              wait,slotselect,avb,logical,first_stage_mount
++product                        /product      erofs ro                                                              wait,slotselect,avb,logical,first_stage_mount
+diff --git a/imx8m/phyboard_polis/init.imx8mm.ddr4.rc b/imx8m/phyboard_polis/init.imx8mm.ddr4.rc
+new file mode 100644
+index 00000000..de486360
+--- /dev/null
++++ b/imx8m/phyboard_polis/init.imx8mm.ddr4.rc
+@@ -0,0 +1,7 @@
++on early-boot
++    # Wifi firmware reload path
++    chown wifi wifi /sys/module/brcmfmac/parameters/alternative_fw_path
++
++    # Prepare for wifi
++    setprop wifi.interface wlan0
++    setprop wifi.direct.interface p2p-dev-wlan0
+diff --git a/imx8m/phyboard_polis/init.imx8mm.lpddr4.rc b/imx8m/phyboard_polis/init.imx8mm.lpddr4.rc
+new file mode 100644
+index 00000000..5e095e66
+--- /dev/null
++++ b/imx8m/phyboard_polis/init.imx8mm.lpddr4.rc
+@@ -0,0 +1,5 @@
++on early-boot
++    # Prepare for wifi
++    setprop wifi.interface wlan0
++    setprop wifi.direct.interface p2p0
++    setprop wifi.concurrent.interface wlan1
+diff --git a/imx8m/phyboard_polis/init.imx8mm.rc b/imx8m/phyboard_polis/init.imx8mm.rc
+new file mode 100755
+index 00000000..d1a3b1f7
+--- /dev/null
++++ b/imx8m/phyboard_polis/init.imx8mm.rc
+@@ -0,0 +1,50 @@
++on early-boot
++
++    # Set OpenGLES version
++    setprop ro.opengles.version 131072
++
++    # Set GPU 3D minimum clock to 3/64
++    write /sys/bus/platform/drivers/galcore/gpu3DMinClock 3
++
++    # Disable backpressure gpu composition
++    setprop debug.sf.enable_gl_backpressure false
++
++    # change for FSL specific service
++    chown root system /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
++    chmod 0664 /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
++    chown root system /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
++    chmod 0664 /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
++    chown root system /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
++    chmod 0664 /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
++    chown root system /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_cur_freq
++    chmod 0440 /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_cur_freq
++    chown root system /sys/devices/system/cpu/cpu0/cpufreq/scaling_available_frequencies
++    chown root system /sys/devices/system/cpu/cpu2/online
++    chmod 0664 /sys/devices/system/cpu/cpu2/online
++    chown root system /sys/devices/system/cpu/cpu3/online
++    chmod 0664 /sys/devices/system/cpu/cpu3/online
++
++on property:sys.boot_completed=1
++    # Set default CPU frequency governor
++    # configure governor settings for little cluster
++    write /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor "schedutil"
++    # The rate-limit tunable in the schedutil governor applies to transitions to both lower and higher frequencies
++    # Set up and down limit to 200us/200us
++    write /sys/devices/system/cpu/cpufreq/schedutil/rate_limit_us 200
++    write /proc/sys/kernel/sched_util_clamp_min_rt_default 512
++
++on property:sys.boot_completed=1
++    # update cpuset now that processors are up
++    write /dev/cpuset/foreground/cpus 0-3
++
++    # top-app gets all cpus
++    write /dev/cpuset/top-app/cpus 0-3
++
++    #background contains a small subset (generally one little core)
++    write /dev/cpuset/background/cpus 0
++
++    # add system-background cpuset, a new cpuset for system services
++    # that should not run on larger cores
++    # system-background is for system tasks that should only run on
++    # little cores, not on bigs to be used only by init
++    write /dev/cpuset/system-background/cpus 0-2
+diff --git a/imx8m/phyboard_polis/init.rc b/imx8m/phyboard_polis/init.rc
+new file mode 100644
+index 00000000..953c8bb1
+--- /dev/null
++++ b/imx8m/phyboard_polis/init.rc
+@@ -0,0 +1,226 @@
++import /vendor/etc/init/hw/init.${ro.hardware}.usb.rc
++import /vendor/etc/init/hw/init.${ro.hardware}.${ro.boot.soc_type}.rc
++import /vendor/etc/init/hw/init.${ro.hardware}.additional.rc
++
++on early-init
++    # mount the debugfs
++    mount debugfs none /sys/kernel/debug/ mode=0755
++
++on early-init
++    start early_init_sh
++    # Set the host name which used in console
++    export HOSTNAME evk_8mm
++
++    # Due keymaster start very early so set prop here
++    # Also gatekeeper share same role for keymaster
++    setprop ro.hardware.keystore ${ro.boot.keystore}
++    setprop ro.hardware.gatekeeper ${ro.boot.keystore}
++    setprop vendor.storageproxyd ${ro.boot.keystore}
++
++    # Use ro.boot.lcd_density to override ro.sf.lcd_density
++    setprop ro.sf.lcd_density ${ro.boot.lcd_density}
++
++# Skip charger_not_need trigger for charger mode
++on early-init && property:ro.boot.mode=charger
++    setprop vendor.skip.charger_not_need 1
++
++on init && property:vendor.skip.charger_not_need=0
++    start watchdogd
++
++    # disable cursor blink for fbcon, if no splash screen support
++    write /sys/class/graphics/fbcon/cursor_blink 0
++
++    # deattch the fbcon as hdmi hotplug conflict with fbcon
++    write /sys/class/vtconsole/vtcon1/bind 0
++
++    chown system system /dev/cpuctl/top-app/cpu.uclamp.min
++    chmod 664 /dev/cpuctl/top-app/cpu.uclamp.min
++    chown system system /dev/cpuctl/top-app/cpu.uclamp.latency_sensitive
++    chmod 664 /dev/cpuctl/top-app/cpu.uclamp.latency_sensitive
++    chown system system /dev/cpuctl/foreground/cpu.uclamp.min
++    chmod 664 /dev/cpuctl/foreground/cpu.uclamp.min
++    chown system system /dev/cpuctl/foreground/cpu.uclamp.latency_sensitive
++    chmod 664 /dev/cpuctl/foreground/cpu.uclamp.latency_sensitive
++    chown system system /dev/cpuctl/rt/cpu.uclamp.min
++    chmod 664 /dev/cpuctl/rt/cpu.uclamp.min
++    chown system system /dev/cpuctl/rt/cpu.uclamp.latency_sensitive
++    chmod 664 /dev/cpuctl/rt/cpu.uclamp.latency_sensitive
++    chown system system /dev/cpuctl/background/cpu.uclamp.max
++    chmod 664 /dev/cpuctl/background/cpu.uclamp.max
++
++    # set default uclamp value for foreground/top-app/rt/background (only affects EAS)
++    write /dev/cpuctl/foreground/cpu.uclamp.min 20
++    write /dev/cpuctl/foreground/cpu.uclamp.latency_sensitive 1
++    write /dev/cpuctl/top-app/cpu.uclamp.min 50
++    write /dev/cpuctl/top-app/cpu.uclamp.latency_sensitive 1
++    write /dev/cpuctl/rt/cpu.uclamp.min 60
++    write /dev/cpuctl/rt/cpu.uclamp.latency_sensitive 1
++    write /dev/cpuctl/background/cpu.uclamp.max 50
++
++on late-fs && property:vendor.storageproxyd=trusty && property:vendor.skip.charger_not_need=0
++    start storageproxyd
++    start vendor.confirmationui_default
++
++on late-fs && property:vendor.skip.charger_not_need=0
++    # Start keymaster/gatekeeper/oemlock service
++    start vendor.gatekeeper-${ro.boot.keystore}
++    start vendor.keymint-${ro.boot.keystore}
++    start vendor.oemlock-1-0-${ro.boot.keystore}
++    setprop vendor.powerhal.init 1
++
++    # Wait for keymaster
++    exec_start wait_for_keymaster
++
++    mount_all /vendor/etc/fstab.nxp --late
++
++on early-boot && property:vendor.skip.charger_not_need=0
++    # For evk_8mm, when swap used about 400M, upgrade the level.
++    setprop ro.lmk.upgrade_pressure 80
++    setprop ro.lmk.downgrade_pressure 95
++    setprop ro.lmk.critical_upgrade true
++
++    setprop vendor.hwc.stretch.filter  1
++
++    # Default g2d [dpu|pxp|viv] lib to be used
++    setprop vendor.imx.default-g2d viv
++
++    # fsl omx graphic manager media framework property
++    setprop vendor.rw.VIDEO_RENDER_NAME video_render.surface
++    setprop vendor.media.fsl_codec.flag 7
++    setprop media.c2.hal.selection aidl
++
++    setprop camera.disable_zsl_mode 1
++
++   # Tweak the mmc device read ahead buffer size
++    write /sys/block/mmcblk1/queue/read_ahead_kb 2048
++    write /sys/block/mmcblk2/queue/read_ahead_kb 2048
++
++    # Set tracefs permission to 755
++    chmod 0755 /sys/kernel/debug/tracing
++
++    # Set light sensor sysfs path and light sensor threshold lux value
++    setprop ro.hardware.lightsensor "/sys/class/i2c-dev/i2c-0/device/0-0044/"
++    setprop vendor.ro.lightsensor.threshold  20
++
++    # Allow DSD file(duration larger than 10s) can play
++    setprop audio.offload.min.duration.secs 10
++
++    # Enlarge limition of audio buffer allocation
++    setprop ro.af.client_heap_size_kbyte 32768
++
++    start vendor.wifi_hal_legacy
++
++
++service wpa_supplicant /vendor/bin/hw/wpa_supplicant \
++    -O/data/vendor/wifi/wpa/sockets -puse_p2p_group_interface=1 \
++    -g@android:wpa_wlan0
++    interface aidl android.hardware.wifi.supplicant.ISupplicant/default
++    class main
++    socket wpa_wlan0 dgram 660 wifi wifi
++    disabled
++    oneshot
++
++# Set watchdog timer to 30 seconds and pet it every 10 seconds to get a 20 second margin
++service watchdogd /system/bin/watchdogd 10 20
++    class core
++    seclabel u:r:watchdogd:s0
++
++# bugreport is triggered by holding down volume down, volume up and power
++service bugreport /system/bin/dumpstate -d -p -z
++    class main
++    disabled
++    oneshot
++    keycodes 114 115 116
++
++service vsidaemon /vendor/bin/vsidaemon
++    class main
++    user root
++
++on boot && property:vendor.skip.charger_not_need=0
++    start audioserver
++    start mediadrm
++    start media
++    start drm
++
++on fs && property:vendor.skip.charger_not_need=0
++# mount ext4 partitions
++    mount_all /vendor/etc/fstab.nxp --early
++
++    # Adjust parameters for dm-verity device
++    write /sys/block/dm-0/queue/read_ahead_kb 4096
++
++    # Update dm-verity state and set partition.*.verified properties
++    verity_update_state
++
++on post-fs && property:vendor.skip.charger_not_need=0
++    # Swap in only 1 page at a time
++    write /proc/sys/vm/page-cluster 0
++
++    # Grant permission for fetching available_pages info of statsd
++    chown system system /proc/pagetypeinfo
++    chmod 0440 /proc/pagetypeinfo
++
++on post-fs-data && property:vendor.skip.charger_not_need=0
++    setprop vold.post_fs_data_done 1
++    # HWC data
++    mkdir /data/vendor/hwc 0771 system graphics
++
++on zygote-start && property:vendor.skip.charger_not_need=0
++    # Create the directories used by the Wireless subsystem
++    mkdir /data/vendor/wifi 0771 wifi wifi
++    mkdir /data/vendor/wifi/wifi_dumps 0770 wifi wifi
++    mkdir /data/vendor/wifi/wpa 0770 wifi wifi
++    mkdir /data/vendor/wifi/wpa/sockets 0770 wifi wifi
++
++service early_init_sh /vendor/bin/init.insmod.sh /vendor/etc/early.init.cfg vendor.all.early_init.ready
++    class main
++    user root
++    group root system
++    disabled
++    oneshot
++
++on post-fs-data && property:vendor.storageproxyd=trusty && property:vendor.skip.charger_not_need=0
++    # create temp node for secure storage proxy
++    mkdir /data/vendor/ss 0700 system system
++    restart storageproxyd
++
++service storageproxyd /vendor/bin/storageproxyd -p /data/vendor/ss -r /dev/mmcblk2rpmb -d /dev/trusty-ipc-dev0
++   group system
++
++on property:ro.boot.vendor.sysrq=1 && property:vendor.skip.charger_not_need=0
++    write /proc/sys/kernel/sysrq 1
++
++# setenv append_bootargs androidboot.usb.debugging=1
++on property:ro.boot.usb.debugging=1
++    setprop persist.sys.usb.config adb
++
++# setenv append_bootargs androidboot.lpa.enable=1
++on property:ro.boot.lpa.enable=1
++    setprop vendor.audio.lpa.hold_second 20
++    setprop vendor.audio.lpa.period_ms 500
++    setprop vendor.audio.lpa.enable 1
++
++service confirmationui_ta_load /vendor/bin/trusty_apploader /vendor/firmware/tee/confirmationui.app
++    user root
++    group root system
++    disabled
++    oneshot
++
++on property:sys.boot_completed=1 && property:vendor.storageproxyd=trusty && property:vendor.skip.charger_not_need=0
++    start confirmationui_ta_load
++
++service imx_dek_extractor /vendor/bin/hw/imx_dek_extractor
++    user system
++    group system
++    disabled
++    oneshot
++
++on property:sys.boot_completed=1 && property:vendor.storageproxyd=trusty
++    start imx_dek_extractor
++
++on property:sys.boot_completed=1
++    # Turn on swap
++    swapon_all /vendor/etc/fstab.nxp
++
++on property:sys.boot_completed=1
++    start vendor.secretkeeper.${ro.boot.keystore}
+diff --git a/imx8m/phyboard_polis/init.recovery.nxp.rc b/imx8m/phyboard_polis/init.recovery.nxp.rc
+new file mode 100644
+index 00000000..9a595c06
+--- /dev/null
++++ b/imx8m/phyboard_polis/init.recovery.nxp.rc
+@@ -0,0 +1,8 @@
++on init
++    # disable cursor blink for fbcon, if no splash screen support
++    write /sys/class/graphics/fbcon/cursor_blink 0
++
++    setprop sys.usb.configfs 1
++
++on post-fs-data
++    setprop sys.usb.controller "ci_hdrc.0"
+diff --git a/imx8m/phyboard_polis/init.usb.rc b/imx8m/phyboard_polis/init.usb.rc
+new file mode 100644
+index 00000000..de4dcefb
+--- /dev/null
++++ b/imx8m/phyboard_polis/init.usb.rc
+@@ -0,0 +1,95 @@
++#
++# Copyright (C) 2016 The Android Open-Source Project
++# Copyright 2018 NXP
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at
++#
++#      http://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++#
++
++on early-boot
++    mount configfs none /config
++    mkdir /config/usb_gadget/g1 0770
++    mkdir /config/usb_gadget/g1/strings/0x409 0770
++    write /config/usb_gadget/g1/bcdUSB 0x0200
++    write /config/usb_gadget/g1/idVendor 0x18d1
++    write /config/usb_gadget/g1/bcdDevice 0x0440
++    write /config/usb_gadget/g1/strings/0x409/serialnumber ${ro.serialno}
++    write /config/usb_gadget/g1/strings/0x409/manufacturer ${ro.product.manufacturer}
++    write /config/usb_gadget/g1/strings/0x409/product ${ro.product.model}
++    mkdir /config/usb_gadget/g1/functions/mass_storage.0
++    mkdir /config/usb_gadget/g1/functions/accessory.gs2
++    mkdir /config/usb_gadget/g1/functions/audio_source.gs3
++    mkdir /config/usb_gadget/g1/functions/rndis.gs4
++    mkdir /config/usb_gadget/g1/functions/midi.gs5
++    mkdir /config/usb_gadget/g1/functions/ncm.gs6
++    mkdir /config/usb_gadget/g1/functions/ffs.adb
++    mkdir /config/usb_gadget/g1/functions/ffs.mtp
++    mkdir /config/usb_gadget/g1/functions/ffs.ptp
++    mkdir /config/usb_gadget/g1/configs/b.1 0770
++    mkdir /config/usb_gadget/g1/configs/b.1/strings/0x409 0770
++    write /config/usb_gadget/g1/os_desc/b_vendor_code 0x1
++    write /config/usb_gadget/g1/os_desc/qw_sign "MSFT100"
++    mkdir /dev/usb-ffs 0775 shell shell
++    mkdir /dev/usb-ffs/adb 0770 shell shell
++    mount functionfs adb /dev/usb-ffs/adb rmode=0770,fmode=0660,uid=2000,gid=2000
++    mkdir /dev/usb-ffs/mtp 0770 mtp mtp
++    mkdir /dev/usb-ffs/ptp 0770 mtp mtp
++    mount functionfs mtp /dev/usb-ffs/mtp rmode=0770,fmode=0660,uid=1024,gid=1024,no_disconnect=1
++    mount functionfs ptp /dev/usb-ffs/ptp rmode=0770,fmode=0660,uid=1024,gid=1024,no_disconnect=1
++    setprop sys.usb.mtp.device_type 3
++    setprop vendor.usb.config "ci_hdrc.0"
++    write /sys/module/libcomposite/parameters/disable_l1_for_hs "y"
++    symlink /config/usb_gadget/g1/configs/b.1 /config/usb_gadget/g1/os_desc/b.1
++
++    # uvc function
++    mkdir /config/usb_gadget/g1/functions/uvc.0
++    write /config/usb_gadget/g1/functions/uvc.0/function_name "Android Webcam"
++    write /config/usb_gadget/g1/functions/uvc.0/streaming_maxpacket 3072
++    # setup control params
++    mkdir /config/usb_gadget/g1/functions/uvc.0/control/header/h
++    symlink /config/usb_gadget/g1/functions/uvc.0/control/header/h \
++    /config/usb_gadget/g1/functions/uvc.0/control/class/fs/h
++    symlink /config/usb_gadget/g1/functions/uvc.0/control/header/h \
++    /config/usb_gadget/g1/functions/uvc.0/control/class/ss/h
++    mkdir /config/usb_gadget/g1/functions/uvc.0/streaming/mjpeg/m
++    # 30 fps support for 720p.
++    mkdir /config/usb_gadget/g1/functions/uvc.0/streaming/mjpeg/m/720p
++    write /config/usb_gadget/g1/functions/uvc.0/streaming/mjpeg/m/720p/wWidth 1280
++    write /config/usb_gadget/g1/functions/uvc.0/streaming/mjpeg/m/720p/wHeight 720
++    write /config/usb_gadget/g1/functions/uvc.0/streaming/mjpeg/m/720p/dwMinBitRate 29491200
++    write /config/usb_gadget/g1/functions/uvc.0/streaming/mjpeg/m/720p/dwMaxBitRate 29491200
++    write /config/usb_gadget/g1/functions/uvc.0/streaming/mjpeg/m/720p/dwMaxVideoFrameBufferSize 1843200
++    write /config/usb_gadget/g1/functions/uvc.0/streaming/mjpeg/m/720p/dwDefaultFrameInterval 333333
++    write /config/usb_gadget/g1/functions/uvc.0/streaming/mjpeg/m/720p/dwFrameInterval "333333"
++    # 30 fps support for 1080p.
++    mkdir /config/usb_gadget/g1/functions/uvc.0/streaming/mjpeg/m/1080p
++    write /config/usb_gadget/g1/functions/uvc.0/streaming/mjpeg/m/1080p/wHeight 1080
++    write /config/usb_gadget/g1/functions/uvc.0/streaming/mjpeg/m/1080p/wWidth 1920
++    write /config/usb_gadget/g1/functions/uvc.0/streaming/mjpeg/m/1080p/dwMaxVideoFrameBufferSize 4147200
++    write /config/usb_gadget/g1/functions/uvc.0/streaming/mjpeg/m/1080p/dwDefaultFrameInterval 333333
++    write /config/usb_gadget/g1/functions/uvc.0/streaming/mjpeg/m/1080p/dwFrameInterval "333333"
++    # setup streaming params
++    mkdir /config/usb_gadget/g1/functions/uvc.0/streaming/header/h
++    mkdir /config/usb_gadget/g1/functions/uvc.0/streaming/header/h/m
++    symlink /config/usb_gadget/g1/functions/uvc.0/streaming/mjpeg/m \
++    /config/usb_gadget/g1/functions/uvc.0/streaming/header/h/m
++    symlink /config/usb_gadget/g1/functions/uvc.0/streaming/header/h \
++    /config/usb_gadget/g1/functions/uvc.0/streaming/class/fs/h
++    symlink /config/usb_gadget/g1/functions/uvc.0/streaming/header/h \
++    /config/usb_gadget/g1/functions/uvc.0/streaming/class/hs/h
++    symlink /config/usb_gadget/g1/functions/uvc.0/streaming/header/h \
++    /config/usb_gadget/g1/functions/uvc.0/streaming/class/ss/h
++
++on boot
++    setprop sys.usb.configfs 2
++
++on post-fs-data && property:vendor.gki.enable=true
++    setprop sys.usb.controller "ci_hdrc.0"
+diff --git a/imx8m/phyboard_polis/ueventd.nxp.rc b/imx8m/phyboard_polis/ueventd.nxp.rc
+new file mode 100644
+index 00000000..5b60e609
+--- /dev/null
++++ b/imx8m/phyboard_polis/ueventd.nxp.rc
+@@ -0,0 +1,29 @@
++/dev/block/by-name/presistdata 0600   system     system
++/dev/block/by-name/fbmisc 0600   system     system
++/dev/ttymxc0              0660   bluetooth  bluetooth
++/dev/ttymxc2              0660   bluetooth  bluetooth
++/dev/snd/*                0660   system     audio
++/dev/video*               0660   system     camera
++/dev/mxc_hantro           0666   media      drmrpc
++/dev/mxc_hantro_h1        0666   media      drmrpc
++/dev/vsi_daemon_ctrl      0666   media      drmrpc
++/dev/ion                  0666   media      drmrpc
++/dev/galcore	          0666 	 system     graphics
++/dev/graphics/fb0         0660   system     graphics
++/dev/watchdog             0660   system     root
++/dev/mmcblk2rpmb    0600   system     system
++/dev/trusty-ipc-dev0      0660   system     drmrpc
++/dev/trusty-log0          0660   system     system
++/dev/block/pmem0          0660 system system
++/dev/dma_heap/reserved    0666   system     system
++/dev/dma_heap/reserved-uncached    0666   system     system
++/dev/dma_heap/secure      0666   system     system
++
++/sys/devices/virtual/thermal/thermal_zone* trip_point_0_temp 0660 system system
++/sys/devices/virtual/thermal/thermal_zone* trip_point_1_temp 0660 system system
++
++/sys/devices/virtual/thermal/thermal_zone* trip_point_0_hyst 0660 system system
++/sys/devices/virtual/thermal/thermal_zone* trip_point_1_hyst 0660 system system
++
++/dev/dmabuf_imx           0664   system     system
++/sys/class/backlight/* brightness 0660 system system
+-- 
+2.34.1
+
