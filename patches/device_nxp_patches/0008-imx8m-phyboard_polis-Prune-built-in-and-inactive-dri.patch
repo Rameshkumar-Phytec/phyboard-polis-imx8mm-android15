@@ -1,0 +1,84 @@
+From d607fa1c4d1424e81dc3d7e0e04b8857fe94731b Mon Sep 17 00:00:00 2001
+From: T S Rameshkumar <rameshkumar.t@phytecembedded.in>
+Date: Wed, 14 Oct 2026 05:36:14 +0530
+Subject: [PATCH 8/8] imx8m: phyboard_polis: Prune built-in and inactive
+ drivers from module lists
+
+Remove modules from BOARD_VENDOR_KERNEL_MODULES and
+BOARD_VENDOR_RAMDISK_KERNEL_MODULES that are either compiled built-in
+into the kernel Image (CONFIG_*=y) or disabled in the PHYTEC defconfig.
+This resolves Ninja build failure where missing .ko files halted
+depmod_vendor_stripped_intermediates image packaging.
+
+Signed-off-by: T S Rameshkumar <rameshkumar.t@phytecembedded.in>
+---
+ imx8m/phyboard_polis/SharedBoardConfig.mk | 11 -----------
+ 1 file changed, 11 deletions(-)
+
+diff --git a/imx8m/phyboard_polis/SharedBoardConfig.mk b/imx8m/phyboard_polis/SharedBoardConfig.mk
+index a9feba87..1a102cc7 100644
+--- a/imx8m/phyboard_polis/SharedBoardConfig.mk
++++ b/imx8m/phyboard_polis/SharedBoardConfig.mk
+@@ -28,9 +28,7 @@ ifeq ($(LOADABLE_KERNEL_MODULE),true)
+ BOARD_VENDOR_KERNEL_MODULES += \
+     $(KERNEL_OUT)/mm/zsmalloc.ko \
+     $(KERNEL_OUT)/drivers/block/zram/zram.ko \
+-    $(KERNEL_OUT)/net/rfkill/rfkill.ko \
+     $(KERNEL_OUT)/net/wireless/cfg80211.ko \
+-    $(KERNEL_OUT)/lib/crypto/libarc4.ko \
+     $(KERNEL_OUT)/net/mac80211/mac80211.ko \
+     $(KERNEL_OUT)/drivers/mxc/gpu-viv/galcore.ko \
+     $(KERNEL_OUT)/drivers/thermal/imx8mm_thermal.ko \
+@@ -53,9 +51,6 @@ BOARD_VENDOR_KERNEL_MODULES += \
+     $(KERNEL_OUT)/sound/soc/codecs/snd-soc-ak5558.ko \
+     $(KERNEL_OUT)/sound/soc/codecs/snd-soc-bt-sco.ko \
+     $(KERNEL_OUT)/sound/soc/generic/snd-soc-simple-card.ko \
+-    $(KERNEL_OUT)/sound/soc/generic/snd-soc-simple-card-utils.ko \
+-    $(KERNEL_OUT)/drivers/rpmsg/rpmsg_ns.ko \
+-    $(KERNEL_OUT)/drivers/rpmsg/virtio_rpmsg_bus.ko \
+     $(KERNEL_OUT)/drivers/remoteproc/imx_rproc.ko \
+     $(KERNEL_OUT)/drivers/i2c/busses/i2c-rpmsg-imx.ko \
+     $(KERNEL_OUT)/sound/soc/fsl/imx-pcm-rpmsg.ko \
+@@ -70,8 +65,6 @@ BOARD_VENDOR_KERNEL_MODULES += \
+     $(KERNEL_OUT)/drivers/rtc/rtc-snvs.ko \
+     $(KERNEL_OUT)/drivers/net/phy/at803x.ko \
+     $(KERNEL_OUT)/drivers/net/phy/realtek.ko \
+-    $(KERNEL_OUT)/drivers/pps/pps_core.ko \
+-    $(KERNEL_OUT)/drivers/ptp/ptp.ko \
+     $(KERNEL_OUT)/drivers/net/ethernet/freescale/fec.ko
+ endif
+ 
+@@ -110,7 +103,6 @@ endif
+ 
+ ifeq ($(LOADABLE_KERNEL_MODULE),true)
+ BOARD_VENDOR_RAMDISK_KERNEL_MODULES +=     \
+-    $(KERNEL_OUT)/drivers/clk/imx/mxc-clk.ko \
+     $(KERNEL_OUT)/drivers/clk/imx/clk-imx8mm.ko \
+     $(KERNEL_OUT)/drivers/soc/imx/soc-imx8m.ko \
+     $(KERNEL_OUT)/drivers/pmdomain/imx/imx8m-blk-ctrl.ko \
+@@ -119,7 +111,6 @@ BOARD_VENDOR_RAMDISK_KERNEL_MODULES +=     \
+     $(KERNEL_OUT)/drivers/pmdomain/imx/gpcv2-imx.ko \
+     $(KERNEL_OUT)/drivers/clocksource/timer-imx-sysctr.ko \
+     $(KERNEL_OUT)/drivers/soc/imx/busfreq-imx8mq.ko \
+-    $(KERNEL_OUT)/drivers/pinctrl/freescale/pinctrl-imx.ko \
+     $(KERNEL_OUT)/drivers/pinctrl/freescale/pinctrl-imx8mm.ko \
+     $(KERNEL_OUT)/drivers/tty/serial/imx.ko \
+     $(KERNEL_OUT)/drivers/watchdog/imx2_wdt.ko \
+@@ -133,14 +124,12 @@ BOARD_VENDOR_RAMDISK_KERNEL_MODULES +=     \
+     $(KERNEL_OUT)/drivers/cpufreq/imx-cpufreq-dt.ko \
+     $(KERNEL_OUT)/drivers/nvmem/nvmem-imx-ocotp.ko \
+     $(KERNEL_OUT)/drivers/mmc/host/sdhci-esdhc-imx.ko \
+-    $(KERNEL_OUT)/drivers/mmc/host/cqhci.ko \
+     $(KERNEL_OUT)/drivers/i2c/busses/i2c-imx.ko \
+     $(KERNEL_OUT)/drivers/i2c/i2c-dev.ko \
+     $(KERNEL_OUT)/drivers/spi/spidev.ko \
+     $(KERNEL_OUT)/drivers/spi/spi-bitbang.ko \
+     $(KERNEL_OUT)/drivers/spi/spi-nxp-fspi.ko \
+     $(KERNEL_OUT)/drivers/spi/spi-imx.ko \
+-    $(KERNEL_OUT)/lib/stmp_device.ko \
+     $(KERNEL_OUT)/drivers/dma/mxs-dma.ko \
+     $(KERNEL_OUT)/drivers/mmc/core/pwrseq_simple.ko \
+     $(KERNEL_OUT)/drivers/mailbox/imx-mailbox.ko \
+-- 
+2.34.1
+
