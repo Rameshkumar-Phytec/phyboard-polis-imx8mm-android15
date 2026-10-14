@@ -1,0 +1,53 @@
+From 61db49efb97fade0a88af157f4b6cae64be46cd1 Mon Sep 17 00:00:00 2001
+From: T S Rameshkumar <rameshkumar.t@phytecembedded.in>
+Date: Wed, 14 Oct 2026 21:52:47 +0530
+Subject: [PATCH] dexpreopt_gen: Support absolute product_packages path when
+ OUT_DIR is external
+
+When OUT_DIR is set to an external filesystem path (e.g. /media/...),
+product_packages.txt is passed as an absolute path. Using
+android.PathForTesting causes a panic with 'Path is outside directory'
+because validatePathInternal rejects paths starting with '/'.
+
+Wrap product_packages with simplePath implementing android.Path to safely
+accept arbitrary absolute and out-of-tree paths.
+
+Signed-off-by: T S Rameshkumar <rameshkumar.t@phytecembedded.in>
+---
+ dexpreopt/dexpreopt_gen/dexpreopt_gen.go | 13 ++++++++++++-
+ 1 file changed, 12 insertions(+), 1 deletion(-)
+
+diff --git a/dexpreopt/dexpreopt_gen/dexpreopt_gen.go b/dexpreopt/dexpreopt_gen/dexpreopt_gen.go
+index 75120052e..2720bcce7 100644
+--- a/dexpreopt/dexpreopt_gen/dexpreopt_gen.go
++++ b/dexpreopt/dexpreopt_gen/dexpreopt_gen.go
+@@ -57,6 +57,17 @@ func (x *builderContext) Rule(android.PackageContext, string, blueprint.RulePara
+ 	return nil
+ }
+ 
++type simplePath string
++
++func (p simplePath) String() string              { return string(p) }
++func (p simplePath) Ext() string                 { return filepath.Ext(string(p)) }
++func (p simplePath) Base() string                { return filepath.Base(string(p)) }
++func (p simplePath) Rel() string                 { return string(p) }
++func (p simplePath) WithoutRel() android.Path    { return p }
++func (p simplePath) RelativeToTop() android.Path  { return p }
++
++var _ android.Path = simplePath("")
++
+ func main() {
+ 	flag.Parse()
+ 
+@@ -207,7 +218,7 @@ func writeScripts(ctx android.BuilderContext, globalSoong *dexpreopt.GlobalSoong
+ 	}
+ 	cpApexSscpServerJar := false // dexpreopt_gen operates on make modules, and since sscp libraries are in soong, this should be a noop
+ 	dexpreoptRule, err := dexpreopt.GenerateDexpreoptRule(
+-		ctx, globalSoong, global, module, android.PathForTesting(productPackagesPath), cpApexSscpServerJar)
++		ctx, globalSoong, global, module, simplePath(productPackagesPath), cpApexSscpServerJar)
+ 	if err != nil {
+ 		panic(err)
+ 	}
+-- 
+2.34.1
+

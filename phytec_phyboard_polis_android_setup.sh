@@ -301,6 +301,12 @@ if [ -n "$PATCH_DIR" ]; then
         "phytec-android_device-imx8mm-polis-15.0.0_1.2.0" \
         "android-15.0.0_1.2.0" \
         "device_nxp_patches"
+
+    apply_patch_stack \
+        "build/soong" \
+        "phytec-android_build_soong-15.0.0_1.2.0" \
+        "android-15.0.0_1.2.0" \
+        "build_soong_patches"
 fi
 
 cd "$android_builddir"
