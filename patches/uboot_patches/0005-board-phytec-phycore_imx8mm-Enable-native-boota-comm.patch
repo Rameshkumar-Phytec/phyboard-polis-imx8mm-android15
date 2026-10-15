@@ -1,0 +1,99 @@
+From 680f4ed7c6a4957f9d0ad5425e7a959c8c8a8cdd Mon Sep 17 00:00:00 2001
+From: T S Rameshkumar <rameshkumar.t@phytecembedded.in>
+Date: Thu, 15 Oct 2026 10:41:59 +0530
+Subject: [PATCH] board: phytec: phycore_imx8mm: Enable native boota command
+ for Android 15 autoboot
+
+Configure CONFIG_BOOTCOMMAND="boota" and bootdelay=2 across Android defconfigs
+and header files. Pass UART3 earlycon (earlycon=ec_imx6q,0x30880000,115200) via
+append_bootargs to provide uninterrupted console diagnostics during early kernel boot.
+
+Signed-off-by: T S Rameshkumar <rameshkumar.t@phytecembedded.in>
+---
+ board/phytec/phycore_imx8mm/phycore_imx8mm.env | 10 +++-------
+ configs/phycore-imx8mm_android_defconfig       |  3 ++-
+ configs/phycore-imx8mm_android_uuu_defconfig   |  3 ++-
+ include/configs/phycore_imx8mm_android.h       | 11 ++++-------
+ 4 files changed, 11 insertions(+), 16 deletions(-)
+
+diff --git a/board/phytec/phycore_imx8mm/phycore_imx8mm.env b/board/phytec/phycore_imx8mm/phycore_imx8mm.env
+index dd18d18ddf1..0f3c3fda37f 100644
+--- a/board/phytec/phycore_imx8mm/phycore_imx8mm.env
++++ b/board/phytec/phycore_imx8mm/phycore_imx8mm.env
+@@ -9,11 +9,7 @@ initrd_high=0xffffffffffffffff
+ splashpos=m,m
+ splashimage=0x50000000
+ 
+-bootargs=console=ttymxc2,115200 earlycon init=/init firmware_class.path=/vendor/firmware loop.max_part=7 swiotlb=512 fw_devlink.strict=0
++append_bootargs=earlycon=ec_imx6q,0x30880000,115200
++bootargs=console=ttymxc2,115200 earlycon=ec_imx6q,0x30880000,115200 init=/init firmware_class.path=/vendor/firmware loop.max_part=7 swiotlb=512 fw_devlink.strict=0
+ 
+-bootcmd=
+-	echo PHYTEC phyBOARD-Polis Booting with Android 15 Kernel...;
+-	if mmc dev 1; then setenv mmcdev 1; else setenv mmcdev 2; fi;
+-	mmc read ${loadaddr} 0x8008 0x10000;
+-	cp.b ${fdtcontroladdr} ${fdt_addr} 0x20000;
+-	booti ${loadaddr} - ${fdt_addr};
++bootcmd=boota
+diff --git a/configs/phycore-imx8mm_android_defconfig b/configs/phycore-imx8mm_android_defconfig
+index a3a776a273a..c0c830b6831 100644
+--- a/configs/phycore-imx8mm_android_defconfig
++++ b/configs/phycore-imx8mm_android_defconfig
+@@ -24,8 +24,9 @@ CONFIG_FIT=y
+ CONFIG_FIT_EXTERNAL_OFFSET=0x3000
+ CONFIG_SPL_LOAD_FIT=y
+ CONFIG_OF_SYSTEM_SETUP=y
++CONFIG_BOOTDELAY=2
+ CONFIG_USE_BOOTCOMMAND=y
+-CONFIG_BOOTCOMMAND="echo PHYTEC phyBOARD-Polis Booting with Android 15 Kernel...; if mmc dev 1; then setenv mmcdev 1; else setenv mmcdev 2; fi; mmc read 0x40480000 0x8008 0x10000; cp.b ${fdtcontroladdr} 0x48000000 0x20000; booti 0x40480000 - 0x48000000"
++CONFIG_BOOTCOMMAND="boota"
+ CONFIG_BOOTSTD_FULL=y
+ CONFIG_DEFAULT_FDT_FILE="imx8mm-phyboard-polis-rdk.dtb"
+ CONFIG_SYS_CBSIZE=2048
+diff --git a/configs/phycore-imx8mm_android_uuu_defconfig b/configs/phycore-imx8mm_android_uuu_defconfig
+index 154da1829a2..bbcaa3565b6 100644
+--- a/configs/phycore-imx8mm_android_uuu_defconfig
++++ b/configs/phycore-imx8mm_android_uuu_defconfig
+@@ -24,8 +24,9 @@ CONFIG_FIT=y
+ CONFIG_FIT_EXTERNAL_OFFSET=0x3000
+ CONFIG_SPL_LOAD_FIT=y
+ CONFIG_OF_SYSTEM_SETUP=y
++CONFIG_BOOTDELAY=2
+ CONFIG_USE_BOOTCOMMAND=y
+-CONFIG_BOOTCOMMAND="echo PHYTEC phyBOARD-Polis Booting with Android 15 Kernel...; if mmc dev 1; then setenv mmcdev 1; else setenv mmcdev 2; fi; mmc read 0x40480000 0x8008 0x10000; cp.b ${fdtcontroladdr} 0x48000000 0x20000; booti 0x40480000 - 0x48000000"
++CONFIG_BOOTCOMMAND="boota"
+ CONFIG_BOOTSTD_FULL=y
+ CONFIG_DEFAULT_FDT_FILE="imx8mm-phyboard-polis-rdk.dtb"
+ CONFIG_SYS_CBSIZE=2048
+diff --git a/include/configs/phycore_imx8mm_android.h b/include/configs/phycore_imx8mm_android.h
+index e6dfeda2350..b03b347fda4 100644
+--- a/include/configs/phycore_imx8mm_android.h
++++ b/include/configs/phycore_imx8mm_android.h
+@@ -12,12 +12,7 @@
+ #undef CFG_EXTRA_ENV_SETTINGS
+ #undef CONFIG_BOOTCOMMAND
+ 
+-#define CONFIG_BOOTCOMMAND \
+-	"echo PHYTEC phyBOARD-Polis Booting with Android 15 Kernel...; " \
+-	"if mmc dev 1; then setenv mmcdev 1; else setenv mmcdev 2; fi; " \
+-	"mmc read 0x40480000 0x8008 0x10000; " \
+-	"cp.b ${fdtcontroladdr} 0x48000000 0x20000; " \
+-	"booti 0x40480000 - 0x48000000"
++#define CONFIG_BOOTCOMMAND "boota"
+ 
+ #define CFG_EXTRA_ENV_SETTINGS		\
+ 	"splashpos=m,m\0"			\
+@@ -26,7 +21,9 @@
+ 	"initrd_high=0xffffffffffffffff\0"	\
+ 	"emmc_dev=2\0"\
+ 	"sd_dev=1\0" \
+-	"bootargs=console=ttymxc2,115200 earlycon init=/init firmware_class.path=/vendor/firmware loop.max_part=7 swiotlb=512 fw_devlink.strict=0\0"
++	"bootdelay=2\0" \
++	"append_bootargs=earlycon=ec_imx6q,0x30880000,115200\0" \
++	"bootargs=console=ttymxc2,115200 earlycon=ec_imx6q,0x30880000,115200 init=/init firmware_class.path=/vendor/firmware loop.max_part=7 swiotlb=512 fw_devlink.strict=0\0"
+ 
+ /* Enable mcu firmware flash */
+ #ifdef CONFIG_FLASH_MCUFIRMWARE_SUPPORT
+-- 
+2.34.1
+

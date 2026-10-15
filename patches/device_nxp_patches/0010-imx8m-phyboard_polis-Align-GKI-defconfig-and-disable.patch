@@ -1,0 +1,44 @@
+From e7833396c21424e1987aa3b285c7fc209be377b7 Mon Sep 17 00:00:00 2001
+From: T S Rameshkumar <rameshkumar.t@phytecembedded.in>
+Date: Thu, 15 Oct 2026 11:16:06 +0530
+Subject: [PATCH 10/10] imx8m: phyboard_polis: Align GKI defconfig and disable
+ OTA VINTF kernel check
+
+Configure TARGET_KERNEL_DEFCONFIG := gki_defconfig for full Android 15
+Framework Compatibility Matrix (FCM) compliance, and disable VINTF OTA
+kernel requirement enforcement during board bring-up.
+
+Signed-off-by: T S Rameshkumar <rameshkumar.t@phytecembedded.in>
+---
+ imx8m/phyboard_polis/UbootKernelBoardConfig.mk | 2 +-
+ imx8m/phyboard_polis/phyboard_polis.mk         | 1 +
+ 2 files changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/imx8m/phyboard_polis/UbootKernelBoardConfig.mk b/imx8m/phyboard_polis/UbootKernelBoardConfig.mk
+index 5cb3c49c..5d2debbe 100644
+--- a/imx8m/phyboard_polis/UbootKernelBoardConfig.mk
++++ b/imx8m/phyboard_polis/UbootKernelBoardConfig.mk
+@@ -6,7 +6,7 @@ TARGET_BOOTLOADER_CONFIG := imx8mm:phycore-imx8mm_android_defconfig
+ TARGET_BOOTLOADER_CONFIG += imx8mm-uuu:phycore-imx8mm_android_uuu_defconfig
+ 
+ # imx8mm kernel defconfig
+-TARGET_KERNEL_DEFCONFIG := imx8_phytec_defconfig
++TARGET_KERNEL_DEFCONFIG := gki_defconfig
+ ifeq ($(LOADABLE_KERNEL_MODULE),true)
+ TARGET_KERNEL_GKI_DEFCONF:= imx8mm_gki.fragment
+ else
+diff --git a/imx8m/phyboard_polis/phyboard_polis.mk b/imx8m/phyboard_polis/phyboard_polis.mk
+index 094d0ee8..28c5cc4c 100644
+--- a/imx8m/phyboard_polis/phyboard_polis.mk
++++ b/imx8m/phyboard_polis/phyboard_polis.mk
+@@ -34,6 +34,7 @@ PRODUCT_VENDOR_PROPERTIES += ro.soc.model=IMX8MM
+ PRODUCT_VENDOR_PROPERTIES += ro.crypto.metadata_init_delete_all_keys.enabled=true
+ # -------@block_treble-------
+ PRODUCT_FULL_TREBLE_OVERRIDE := true
++PRODUCT_OTA_ENFORCE_VINTF_KERNEL_REQUIREMENTS := false
+ 
+ # -------@block_power-------
+ PRODUCT_SOONG_NAMESPACES += vendor/nxp-opensource/imx/power
+-- 
+2.34.1
+

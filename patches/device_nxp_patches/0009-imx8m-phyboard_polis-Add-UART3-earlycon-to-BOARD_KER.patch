@@ -1,0 +1,30 @@
+From ba43f4217884fa7f5dc714d9f5b7911511f1cada Mon Sep 17 00:00:00 2001
+From: T S Rameshkumar <rameshkumar.t@phytecembedded.in>
+Date: Thu, 15 Oct 2026 10:42:28 +0530
+Subject: [PATCH 09/10] imx8m: phyboard_polis: Add UART3 earlycon to
+ BOARD_KERNEL_CMDLINE
+
+Add earlycon=ec_imx6q,0x30880000,115200 to BOARD_KERNEL_CMDLINE to enable
+immediate serial console output from kernel initialization through userspace.
+
+Signed-off-by: T S Rameshkumar <rameshkumar.t@phytecembedded.in>
+---
+ imx8m/phyboard_polis/BoardConfig.mk | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/imx8m/phyboard_polis/BoardConfig.mk b/imx8m/phyboard_polis/BoardConfig.mk
+index 718c147e..1da4ef0f 100644
+--- a/imx8m/phyboard_polis/BoardConfig.mk
++++ b/imx8m/phyboard_polis/BoardConfig.mk
+@@ -128,7 +128,7 @@ BOARD_KERNEL_BASE := 0x40400000
+ CMASIZE=800M
+ 
+ # NXP default config
+-BOARD_KERNEL_CMDLINE := init=/init firmware_class.path=/vendor/firmware loop.max_part=7 bootconfig
++BOARD_KERNEL_CMDLINE := init=/init firmware_class.path=/vendor/firmware loop.max_part=7 bootconfig earlycon=ec_imx6q,0x30880000,115200
+ BOARD_BOOTCONFIG += androidboot.console=ttymxc2 androidboot.hardware=nxp
+ 
+ # memory config
+-- 
+2.34.1
+

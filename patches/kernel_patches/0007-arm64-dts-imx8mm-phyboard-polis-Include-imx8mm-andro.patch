@@ -1,0 +1,31 @@
+From 662e5de66a3e26f74133880a22f7613bb2a27fa7 Mon Sep 17 00:00:00 2001
+From: T S Rameshkumar <rameshkumar.t@phytecembedded.in>
+Date: Thu, 15 Oct 2026 10:40:41 +0530
+Subject: [PATCH] arm64: dts: imx8mm-phyboard-polis: Include
+ imx8mm-android.dtsi for Android 15 boot
+
+Include imx8mm-android.dtsi in the phyBOARD-Polis device tree to define
+the /firmware/android node with boot_devices_mmcblk1 (USDHC2 MicroSD)
+and first-stage mount vbmeta mappings required by U-Boot boota and
+Android init.
+
+Signed-off-by: T S Rameshkumar <rameshkumar.t@phytecembedded.in>
+---
+ arch/arm64/boot/dts/freescale/imx8mm-phyboard-polis-rdk.dts | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/arch/arm64/boot/dts/freescale/imx8mm-phyboard-polis-rdk.dts b/arch/arm64/boot/dts/freescale/imx8mm-phyboard-polis-rdk.dts
+index f981784bc99e..23ea8f6f145d 100644
+--- a/arch/arm64/boot/dts/freescale/imx8mm-phyboard-polis-rdk.dts
++++ b/arch/arm64/boot/dts/freescale/imx8mm-phyboard-polis-rdk.dts
+@@ -10,6 +10,7 @@
+ #include <dt-bindings/leds/common.h>
+ #include <dt-bindings/phy/phy-imx8-pcie.h>
+ #include "imx8mm-phycore-som.dtsi"
++#include "imx8mm-android.dtsi"
+ 
+ / {
+ 	model = "PHYTEC phyBOARD-Polis-i.MX8MM RDK";
+-- 
+2.34.1
+

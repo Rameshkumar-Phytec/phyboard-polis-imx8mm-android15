@@ -1,7 +1,7 @@
 From 64ec5a8e1ec1c6529dc7989cdafefcf8dcf87efe Mon Sep 17 00:00:00 2001
 From: T S Rameshkumar <rameshkumar.t@phytecembedded.in>
 Date: Fri, 9 Oct 2026 18:43:11 +0530
-Subject: [PATCH 6/8] imx8m: phyboard_polis: Add product properties and
+Subject: [PATCH 06/10] imx8m: phyboard_polis: Add product properties and
  framework resource overlays
 
 Add system product.prop configuration and framework resource overlays for phyBOARD-Polis i.MX8MM.
