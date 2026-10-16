@@ -1,7 +1,7 @@
 From d607fa1c4d1424e81dc3d7e0e04b8857fe94731b Mon Sep 17 00:00:00 2001
 From: T S Rameshkumar <rameshkumar.t@phytecembedded.in>
 Date: Wed, 14 Oct 2026 05:36:14 +0530
-Subject: [PATCH 08/10] imx8m: phyboard_polis: Prune built-in and inactive
+Subject: [PATCH 08/11] imx8m: phyboard_polis: Prune built-in and inactive
  drivers from module lists
 
 Remove modules from BOARD_VENDOR_KERNEL_MODULES and

@@ -1,7 +1,7 @@
 From 40a668fe6b6c830503f4faf2115ce55a822f6264 Mon Sep 17 00:00:00 2001
 From: T S Rameshkumar <rameshkumar.t@phytecembedded.in>
 Date: Fri, 9 Oct 2026 18:42:11 +0530
-Subject: [PATCH 03/10] imx8m: phyboard_polis: Add init rc scripts, fstab, and
+Subject: [PATCH 03/11] imx8m: phyboard_polis: Add init rc scripts, fstab, and
  ueventd rules Add fstab.nxp for partition mounting, RAM-specific init.rc
  scripts, USB device rules, and ueventd configuration for i.MX8MM.
 
