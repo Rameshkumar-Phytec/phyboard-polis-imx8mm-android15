@@ -1,7 +1,7 @@
 From d912720cdf8ef2e1c6a3f7d7fad30b43efc22706 Mon Sep 17 00:00:00 2001
 From: T S Rameshkumar <rameshkumar.t@phytecembedded.in>
 Date: Fri, 9 Oct 2026 18:42:59 +0530
-Subject: [PATCH 05/13] imx8m: phyboard_polis: Add SELinux policies, seccomp
+Subject: [PATCH 05/14] imx8m: phyboard_polis: Add SELinux policies, seccomp
  filters, and VINTF manifests
 
 Add board-specific sepolicy (file_contexts, genfs_contexts), seccomp policy files, app whitelist, and VINTF device manifests.

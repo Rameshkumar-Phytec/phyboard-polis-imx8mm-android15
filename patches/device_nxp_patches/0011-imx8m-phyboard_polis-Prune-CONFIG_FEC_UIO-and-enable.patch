@@ -1,7 +1,7 @@
 From 2d083b47d2776a01736e4ea618f6e60db7b8b709 Mon Sep 17 00:00:00 2001
 From: T S Rameshkumar <rameshkumar.t@phytecembedded.in>
 Date: Fri, 16 Oct 2026 15:26:08 +0530
-Subject: [PATCH 11/13] imx8m: phyboard_polis: Prune CONFIG_FEC_UIO and enable
+Subject: [PATCH 11/14] imx8m: phyboard_polis: Prune CONFIG_FEC_UIO and enable
  TI DP83867 PHY module
 
 Remove CONFIG_FEC_UIO and non-i.MX8MM driver fragments from

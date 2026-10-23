@@ -1,7 +1,7 @@
 From 7738a1c09558de9e7b34b99996c0d80de4f386ae Mon Sep 17 00:00:00 2001
 From: T S Rameshkumar <rameshkumar.t@phytecembedded.in>
 Date: Tue, 13 Oct 2026 18:01:12 +0530
-Subject: [PATCH 07/13] imx8m: phyboard_polis: Add standalone bootimage,
+Subject: [PATCH 07/14] imx8m: phyboard_polis: Add standalone bootimage,
  dtboimage rules and kernel versioning
 
 Add standalone make rules for building signed boot.img and dtbo-imx8mm.img

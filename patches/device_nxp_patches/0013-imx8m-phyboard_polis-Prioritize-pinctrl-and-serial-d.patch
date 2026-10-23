@@ -1,7 +1,7 @@
 From 2b197e8dcec5819691917c75506cafdac30c125a Mon Sep 17 00:00:00 2001
 From: T S Rameshkumar <rameshkumar.t@phytecembedded.in>
 Date: Fri, 23 Oct 2026 16:50:45 +0530
-Subject: [PATCH 13/13] imx8m: phyboard_polis: Prioritize pinctrl and serial
+Subject: [PATCH 13/14] imx8m: phyboard_polis: Prioritize pinctrl and serial
  driver module loading
 
 Reorder pinctrl-imx.ko, pinctrl-imx8mm.ko, and imx.ko to load directly
