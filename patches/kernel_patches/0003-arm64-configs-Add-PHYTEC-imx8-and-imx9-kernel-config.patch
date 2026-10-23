@@ -1,7 +1,7 @@
 From 5a8b30a3034825512d439c11f2ed88f46a497d2f Mon Sep 17 00:00:00 2001
 From: T S Rameshkumar <rameshkumar.t@phytecembedded.in>
 Date: Tue, 13 Oct 2026 17:57:08 +0530
-Subject: [PATCH 3/6] arm64: configs: Add PHYTEC imx8 and imx9 kernel
+Subject: [PATCH 3/8] arm64: configs: Add PHYTEC imx8 and imx9 kernel
  configuration fragments
 
 Provide PHYTEC reference kernel configuration files and modular

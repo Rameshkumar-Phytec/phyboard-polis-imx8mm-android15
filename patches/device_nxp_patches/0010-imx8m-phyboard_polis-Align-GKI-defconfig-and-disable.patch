@@ -1,7 +1,7 @@
 From e7833396c21424e1987aa3b285c7fc209be377b7 Mon Sep 17 00:00:00 2001
 From: T S Rameshkumar <rameshkumar.t@phytecembedded.in>
 Date: Thu, 15 Oct 2026 11:16:06 +0530
-Subject: [PATCH 10/12] imx8m: phyboard_polis: Align GKI defconfig and disable
+Subject: [PATCH 10/13] imx8m: phyboard_polis: Align GKI defconfig and disable
  OTA VINTF kernel check
 
 Configure TARGET_KERNEL_DEFCONFIG := gki_defconfig for full Android 15

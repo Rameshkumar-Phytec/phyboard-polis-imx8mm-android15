@@ -1,7 +1,7 @@
 From b5c269bbe54cf4555d883c2a5d145503fadb5b8e Mon Sep 17 00:00:00 2001
 From: T S Rameshkumar <rameshkumar.t@phytecembedded.in>
 Date: Fri, 9 Oct 2026 18:41:51 +0530
-Subject: [PATCH 01/12] imx8m: phyboard_polis: Add target build makefiles and
+Subject: [PATCH 01/13] imx8m: phyboard_polis: Add target build makefiles and
  board configs Add phyboard_polis.mk, BoardConfig.mk, AndroidProducts.mk lunch
  choice (phyboard_polis-userdebug), and U-Boot build script for phyBOARD-Polis
  i.MX8MM.

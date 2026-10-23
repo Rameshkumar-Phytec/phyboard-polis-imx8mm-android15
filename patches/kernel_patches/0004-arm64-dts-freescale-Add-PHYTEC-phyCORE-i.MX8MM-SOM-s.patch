@@ -1,7 +1,7 @@
 From 14ed883074dac0c00cfafc8b7347602a6e3c6b8e Mon Sep 17 00:00:00 2001
 From: T S Rameshkumar <rameshkumar.t@phytecembedded.in>
 Date: Tue, 13 Oct 2026 17:59:23 +0530
-Subject: [PATCH 4/6] arm64: dts: freescale: Add PHYTEC phyCORE-i.MX8MM SOM
+Subject: [PATCH 4/8] arm64: dts: freescale: Add PHYTEC phyCORE-i.MX8MM SOM
  support and base overlays
 
 Add device tree definitions for the PHYTEC phyCORE-i.MX8MM System-on-Module

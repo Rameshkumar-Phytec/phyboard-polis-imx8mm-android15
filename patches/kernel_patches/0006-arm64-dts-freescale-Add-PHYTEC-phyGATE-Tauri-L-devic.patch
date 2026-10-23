@@ -1,7 +1,7 @@
 From c5bde9b1e5fa04b8fc414e47f45801be9b7b4ce2 Mon Sep 17 00:00:00 2001
 From: T S Rameshkumar <rameshkumar.t@phytecembedded.in>
 Date: Tue, 13 Oct 2026 18:00:04 +0530
-Subject: [PATCH 6/6] arm64: dts: freescale: Add PHYTEC phyGATE-Tauri-L device
+Subject: [PATCH 6/8] arm64: dts: freescale: Add PHYTEC phyGATE-Tauri-L device
  trees and interface overlays
 
 Add base device tree for PHYTEC phyGATE-Tauri-L industrial IoT gateway based

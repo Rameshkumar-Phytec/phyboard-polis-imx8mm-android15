@@ -1,0 +1,43 @@
+From 2b197e8dcec5819691917c75506cafdac30c125a Mon Sep 17 00:00:00 2001
+From: T S Rameshkumar <rameshkumar.t@phytecembedded.in>
+Date: Fri, 23 Oct 2026 16:50:45 +0530
+Subject: [PATCH 13/13] imx8m: phyboard_polis: Prioritize pinctrl and serial
+ driver module loading
+
+Reorder pinctrl-imx.ko, pinctrl-imx8mm.ko, and imx.ko to load directly
+after clk-imx8mm.ko in BOARD_VENDOR_RAMDISK_KERNEL_MODULES. This ensures
+the native ttymxc2 serial driver initializes and takes over from earlycon
+as early as possible during first-stage init.
+
+Signed-off-by: T S Rameshkumar <rameshkumar.t@phytecembedded.in>
+---
+ imx8m/phyboard_polis/SharedBoardConfig.mk | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/imx8m/phyboard_polis/SharedBoardConfig.mk b/imx8m/phyboard_polis/SharedBoardConfig.mk
+index f848c2c0..498d258c 100644
+--- a/imx8m/phyboard_polis/SharedBoardConfig.mk
++++ b/imx8m/phyboard_polis/SharedBoardConfig.mk
+@@ -112,6 +112,9 @@ ifeq ($(LOADABLE_KERNEL_MODULE),true)
+ BOARD_VENDOR_RAMDISK_KERNEL_MODULES +=     \
+     $(KERNEL_OUT)/drivers/clk/imx/mxc-clk.ko \
+     $(KERNEL_OUT)/drivers/clk/imx/clk-imx8mm.ko \
++    $(KERNEL_OUT)/drivers/pinctrl/freescale/pinctrl-imx.ko \
++    $(KERNEL_OUT)/drivers/pinctrl/freescale/pinctrl-imx8mm.ko \
++    $(KERNEL_OUT)/drivers/tty/serial/imx.ko \
+     $(KERNEL_OUT)/drivers/soc/imx/soc-imx8m.ko \
+     $(KERNEL_OUT)/drivers/pmdomain/imx/imx8m-blk-ctrl.ko \
+     $(KERNEL_OUT)/drivers/soc/imx/imx8m_pm_domains.ko \
+@@ -119,9 +122,6 @@ BOARD_VENDOR_RAMDISK_KERNEL_MODULES +=     \
+     $(KERNEL_OUT)/drivers/pmdomain/imx/gpcv2-imx.ko \
+     $(KERNEL_OUT)/drivers/clocksource/timer-imx-sysctr.ko \
+     $(KERNEL_OUT)/drivers/soc/imx/busfreq-imx8mq.ko \
+-    $(KERNEL_OUT)/drivers/pinctrl/freescale/pinctrl-imx.ko \
+-    $(KERNEL_OUT)/drivers/pinctrl/freescale/pinctrl-imx8mm.ko \
+-    $(KERNEL_OUT)/drivers/tty/serial/imx.ko \
+     $(KERNEL_OUT)/drivers/watchdog/imx2_wdt.ko \
+     $(KERNEL_OUT)/drivers/regulator/pca9450-regulator.ko \
+     $(KERNEL_OUT)/drivers/gpio/gpio-mxc.ko \
+-- 
+2.34.1
+
