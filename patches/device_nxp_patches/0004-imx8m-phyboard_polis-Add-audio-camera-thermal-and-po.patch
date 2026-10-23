@@ -1,7 +1,7 @@
 From 5d88efdfadb79e08a287efe455abe3ae829bc955 Mon Sep 17 00:00:00 2001
 From: T S Rameshkumar <rameshkumar.t@phytecembedded.in>
 Date: Fri, 9 Oct 2026 18:42:42 +0530
-Subject: [PATCH 04/11] imx8m: phyboard_polis: Add audio, camera, thermal, and
+Subject: [PATCH 04/12] imx8m: phyboard_polis: Add audio, camera, thermal, and
  powerhint HAL configs Add audio policy XMLs, camera configuration JSONs,
  powerhint, thermal info configuration, and Bluetooth build headers.
 

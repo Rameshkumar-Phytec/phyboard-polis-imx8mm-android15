@@ -1,0 +1,74 @@
+From fad6dc9780aa6c3f25ed598b0d2c4b612be4aea9 Mon Sep 17 00:00:00 2001
+From: T S Rameshkumar <rameshkumar.t@phytecembedded.in>
+Date: Fri, 23 Oct 2026 09:37:12 +0530
+Subject: [PATCH 12/12] imx8m: phyboard_polis: Restore missing GKI vendor
+ ramdisk modules
+
+Restore mxc-clk.ko, pinctrl-imx.ko, cqhci.ko, and stmp_device.ko to
+BOARD_VENDOR_RAMDISK_KERNEL_MODULES. Under Android 15 GKI, these core
+SoC clock and pin control drivers are compiled as modules. Having them in
+the vendor ramdisk resolves the first-stage init module loading failure
+for clk-imx8mm.ko and allows USDHC2 SD card controller to probe.
+
+Signed-off-by: T S Rameshkumar <rameshkumar.t@phytecembedded.in>
+---
+ imx8m/phyboard_polis/SharedBoardConfig.mk | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/imx8m/phyboard_polis/SharedBoardConfig.mk b/imx8m/phyboard_polis/SharedBoardConfig.mk
+index ad89aeac..f848c2c0 100644
+--- a/imx8m/phyboard_polis/SharedBoardConfig.mk
++++ b/imx8m/phyboard_polis/SharedBoardConfig.mk
+@@ -51,6 +51,9 @@ BOARD_VENDOR_KERNEL_MODULES += \
+     $(KERNEL_OUT)/sound/soc/codecs/snd-soc-ak5558.ko \
+     $(KERNEL_OUT)/sound/soc/codecs/snd-soc-bt-sco.ko \
+     $(KERNEL_OUT)/sound/soc/generic/snd-soc-simple-card.ko \
++    $(KERNEL_OUT)/sound/soc/generic/snd-soc-simple-card-utils.ko \
++    $(KERNEL_OUT)/drivers/rpmsg/rpmsg_ns.ko \
++    $(KERNEL_OUT)/drivers/rpmsg/virtio_rpmsg_bus.ko \
+     $(KERNEL_OUT)/drivers/remoteproc/imx_rproc.ko \
+     $(KERNEL_OUT)/drivers/i2c/busses/i2c-rpmsg-imx.ko \
+     $(KERNEL_OUT)/sound/soc/fsl/imx-pcm-rpmsg.ko \
+@@ -67,6 +70,8 @@ BOARD_VENDOR_KERNEL_MODULES += \
+     $(KERNEL_OUT)/drivers/net/phy/at803x.ko \
+     $(KERNEL_OUT)/drivers/net/phy/realtek.ko \
+     $(KERNEL_OUT)/drivers/net/phy/dp83867.ko \
++    $(KERNEL_OUT)/drivers/pps/pps_core.ko \
++    $(KERNEL_OUT)/drivers/ptp/ptp.ko \
+     $(KERNEL_OUT)/drivers/net/ethernet/freescale/fec.ko
+ endif
+ 
+@@ -105,6 +110,7 @@ endif
+ 
+ ifeq ($(LOADABLE_KERNEL_MODULE),true)
+ BOARD_VENDOR_RAMDISK_KERNEL_MODULES +=     \
++    $(KERNEL_OUT)/drivers/clk/imx/mxc-clk.ko \
+     $(KERNEL_OUT)/drivers/clk/imx/clk-imx8mm.ko \
+     $(KERNEL_OUT)/drivers/soc/imx/soc-imx8m.ko \
+     $(KERNEL_OUT)/drivers/pmdomain/imx/imx8m-blk-ctrl.ko \
+@@ -113,6 +119,7 @@ BOARD_VENDOR_RAMDISK_KERNEL_MODULES +=     \
+     $(KERNEL_OUT)/drivers/pmdomain/imx/gpcv2-imx.ko \
+     $(KERNEL_OUT)/drivers/clocksource/timer-imx-sysctr.ko \
+     $(KERNEL_OUT)/drivers/soc/imx/busfreq-imx8mq.ko \
++    $(KERNEL_OUT)/drivers/pinctrl/freescale/pinctrl-imx.ko \
+     $(KERNEL_OUT)/drivers/pinctrl/freescale/pinctrl-imx8mm.ko \
+     $(KERNEL_OUT)/drivers/tty/serial/imx.ko \
+     $(KERNEL_OUT)/drivers/watchdog/imx2_wdt.ko \
+@@ -126,12 +133,14 @@ BOARD_VENDOR_RAMDISK_KERNEL_MODULES +=     \
+     $(KERNEL_OUT)/drivers/cpufreq/imx-cpufreq-dt.ko \
+     $(KERNEL_OUT)/drivers/nvmem/nvmem-imx-ocotp.ko \
+     $(KERNEL_OUT)/drivers/mmc/host/sdhci-esdhc-imx.ko \
++    $(KERNEL_OUT)/drivers/mmc/host/cqhci.ko \
+     $(KERNEL_OUT)/drivers/i2c/busses/i2c-imx.ko \
+     $(KERNEL_OUT)/drivers/i2c/i2c-dev.ko \
+     $(KERNEL_OUT)/drivers/spi/spidev.ko \
+     $(KERNEL_OUT)/drivers/spi/spi-bitbang.ko \
+     $(KERNEL_OUT)/drivers/spi/spi-nxp-fspi.ko \
+     $(KERNEL_OUT)/drivers/spi/spi-imx.ko \
++    $(KERNEL_OUT)/lib/stmp_device.ko \
+     $(KERNEL_OUT)/drivers/dma/mxs-dma.ko \
+     $(KERNEL_OUT)/drivers/mmc/core/pwrseq_simple.ko \
+     $(KERNEL_OUT)/drivers/mailbox/imx-mailbox.ko \
+-- 
+2.34.1
+
