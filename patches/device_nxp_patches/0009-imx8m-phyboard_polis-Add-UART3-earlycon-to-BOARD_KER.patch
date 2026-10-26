@@ -1,7 +1,7 @@
 From ba43f4217884fa7f5dc714d9f5b7911511f1cada Mon Sep 17 00:00:00 2001
 From: T S Rameshkumar <rameshkumar.t@phytecembedded.in>
 Date: Thu, 15 Oct 2026 10:42:28 +0530
-Subject: [PATCH 09/15] imx8m: phyboard_polis: Add UART3 earlycon to
+Subject: [PATCH 09/16] imx8m: phyboard_polis: Add UART3 earlycon to
  BOARD_KERNEL_CMDLINE
 
 Add earlycon=ec_imx6q,0x30880000,115200 to BOARD_KERNEL_CMDLINE to enable

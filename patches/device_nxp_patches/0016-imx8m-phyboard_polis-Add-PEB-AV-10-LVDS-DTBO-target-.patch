@@ -1,0 +1,31 @@
+From f571302e92513fd61507065ad2e997f9ee4d2280 Mon Sep 17 00:00:00 2001
+From: T S Rameshkumar <rameshkumar.t@phytecembedded.in>
+Date: Mon, 26 Oct 2026 10:57:41 +0530
+Subject: [PATCH 16/16] imx8m: phyboard_polis: Add PEB-AV-10 LVDS DTBO target
+ to TARGET_BOARD_DTS_CONFIG
+
+Register imx8mm-lvds:imx8mm-phyboard-polis-peb-av-10.dtb in TARGET_BOARD_DTS_CONFIG
+so that the PEB-AV-10 LVDS display configuration is automatically compiled into
+dtbo.img, allowing runtime display selection on PHYTEC phyBOARD-Polis i.MX8MM.
+
+Signed-off-by: T S Rameshkumar <rameshkumar.t@phytecembedded.in>
+---
+ imx8m/phyboard_polis/BoardConfig.mk | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/imx8m/phyboard_polis/BoardConfig.mk b/imx8m/phyboard_polis/BoardConfig.mk
+index 1da4ef0f..527222e6 100644
+--- a/imx8m/phyboard_polis/BoardConfig.mk
++++ b/imx8m/phyboard_polis/BoardConfig.mk
+@@ -165,6 +165,8 @@ ifeq ($(TARGET_USE_DYNAMIC_PARTITIONS),true)
+     TARGET_BOARD_DTS_CONFIG ?= imx8mm:imx8mm-phyboard-polis-rdk-no-product.dtb
+   else
+     TARGET_BOARD_DTS_CONFIG ?= imx8mm:imx8mm-phyboard-polis-rdk.dtb
++    # imx8mm with PEB-AV-10 LVDS panel display (TI SN65DSI83)
++    TARGET_BOARD_DTS_CONFIG += imx8mm-lvds:imx8mm-phyboard-polis-peb-av-10.dtb
+   endif
+ else
+   ifeq ($(IMX_NO_PRODUCT_PARTITION),true)
+-- 
+2.34.1
+

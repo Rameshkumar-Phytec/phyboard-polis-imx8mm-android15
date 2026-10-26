@@ -1,7 +1,7 @@
 From 54facf69e5b1f23d397bd333dd50c200e9c56576 Mon Sep 17 00:00:00 2001
 From: T S Rameshkumar <rameshkumar.t@phytecembedded.in>
 Date: Fri, 23 Oct 2026 18:17:30 +0530
-Subject: [PATCH 14/15] imx8m: phyboard_polis: Enable PF8x00 PMIC regulator
+Subject: [PATCH 14/16] imx8m: phyboard_polis: Enable PF8x00 PMIC regulator
  module
 
 Enable CONFIG_REGULATOR_PF8X00=m in android_addition_defconfig and add
