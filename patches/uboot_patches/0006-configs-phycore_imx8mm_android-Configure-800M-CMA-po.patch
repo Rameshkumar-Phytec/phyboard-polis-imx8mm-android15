@@ -1,0 +1,34 @@
+From fc88f2d847e1532ad86face27db3e8a168e2446d Mon Sep 17 00:00:00 2001
+From: T S Rameshkumar <rameshkumar.t@phytecembedded.in>
+Date: Mon, 26 Oct 2026 10:39:12 +0530
+Subject: [PATCH] configs: phycore_imx8mm_android: Configure 800M CMA pool in
+ default boot environment
+
+Append cma=800M@0x400M-0xb80M to append_bootargs and bootargs in
+CFG_EXTRA_ENV_SETTINGS so the Linux kernel reserves an 800MB contiguous
+memory allocation pool on boot, preventing cma_alloc starvation under
+Vivante 3D GPU and Hantro VPU multimedia workloads.
+
+Signed-off-by: T S Rameshkumar <rameshkumar.t@phytecembedded.in>
+---
+ include/configs/phycore_imx8mm_android.h | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/include/configs/phycore_imx8mm_android.h b/include/configs/phycore_imx8mm_android.h
+index b03b347fda4..2319dc082fc 100644
+--- a/include/configs/phycore_imx8mm_android.h
++++ b/include/configs/phycore_imx8mm_android.h
+@@ -22,8 +22,8 @@
+ 	"emmc_dev=2\0"\
+ 	"sd_dev=1\0" \
+ 	"bootdelay=2\0" \
+-	"append_bootargs=earlycon=ec_imx6q,0x30880000,115200\0" \
+-	"bootargs=console=ttymxc2,115200 earlycon=ec_imx6q,0x30880000,115200 init=/init firmware_class.path=/vendor/firmware loop.max_part=7 swiotlb=512 fw_devlink.strict=0\0"
++	"append_bootargs=earlycon=ec_imx6q,0x30880000,115200 cma=800M@0x400M-0xb80M\0" \
++	"bootargs=console=ttymxc2,115200 earlycon=ec_imx6q,0x30880000,115200 init=/init firmware_class.path=/vendor/firmware loop.max_part=7 swiotlb=512 fw_devlink.strict=0 cma=800M@0x400M-0xb80M\0"
+ 
+ /* Enable mcu firmware flash */
+ #ifdef CONFIG_FLASH_MCUFIRMWARE_SUPPORT
+-- 
+2.34.1
+

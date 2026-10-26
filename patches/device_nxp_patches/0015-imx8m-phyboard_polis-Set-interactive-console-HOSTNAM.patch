@@ -1,0 +1,31 @@
+From 636d2b1c0786601a7273335420082c38940a77c3 Mon Sep 17 00:00:00 2001
+From: T S Rameshkumar <rameshkumar.t@phytecembedded.in>
+Date: Mon, 26 Oct 2026 10:39:04 +0530
+Subject: [PATCH 15/15] imx8m: phyboard_polis: Set interactive console HOSTNAME
+ to phyboard_polis
+
+Update HOSTNAME exported during early-init from evk_8mm to phyboard_polis
+so interactive mksh serial console sessions reflect the PHYTEC phyBOARD-Polis
+hardware identity.
+
+Signed-off-by: T S Rameshkumar <rameshkumar.t@phytecembedded.in>
+---
+ imx8m/phyboard_polis/init.rc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/imx8m/phyboard_polis/init.rc b/imx8m/phyboard_polis/init.rc
+index 953c8bb1..6a7818d4 100644
+--- a/imx8m/phyboard_polis/init.rc
++++ b/imx8m/phyboard_polis/init.rc
+@@ -9,7 +9,7 @@ on early-init
+ on early-init
+     start early_init_sh
+     # Set the host name which used in console
+-    export HOSTNAME evk_8mm
++    export HOSTNAME phyboard_polis
+ 
+     # Due keymaster start very early so set prop here
+     # Also gatekeeper share same role for keymaster
+-- 
+2.34.1
+
