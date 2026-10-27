@@ -1,0 +1,17 @@
+# fastboot-info for phyboard_polis
+version 1
+flash boot
+flash init_boot
+flash dtbo
+flash vendor_boot
+flash --apply-vbmeta vbmeta
+reboot fastboot
+update-super
+flash system
+flash system_dlkm
+flash system_ext
+flash vendor
+flash vendor_dlkm
+flash product
+if-wipe erase userdata
+if-wipe erase metadata

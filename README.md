@@ -99,6 +99,19 @@
 ├── configs/
 │   ├── imx8mm_phycore_android_defconfig  # U-Boot Android 15 defconfig
 │   └── phycore_imx8mm.env                # Clean, industrial U-Boot autoboot environment
+├── images/                     # Prebuilt Android 15 flash images & scripts (Git LFS)
+│   ├── flash.sh                # 1-Click SD card partitioning & flashing script
+│   ├── imx-sdcard-partition.sh # NXP SD card partitioner & multi-slot flasher
+│   ├── fastboot_imx_flashall.sh# Fastboot USB flash script
+│   ├── uuu_imx_android_flash.sh# NXP UUU (Universal Update Utility) flasher
+│   ├── u-boot-imx8mm.imx       # Verified U-Boot SPL + Proper bootloader
+│   ├── boot.img                # Linux Kernel 6.6.58 GKI
+│   ├── init_boot.img           # Generic first-stage ramdisk
+│   ├── vendor_boot.img         # PHYTEC vendor ramdisk & DTB
+│   ├── dtbo-imx8mm.img         # PEB-AV-10 LVDS device tree overlay
+│   ├── vbmeta-imx8mm.img       # Android Verified Boot metadata
+│   ├── super.img               # Android system, vendor, product image
+│   └── partition-table*.img    # GPT partition tables (default, dual, 28GB)
 └── manifests/
     ├── phytec-android-15.0.0_1.2.0.xml   # Standalone Repo manifest XML
     ├── imx-android-15.0.0_1.2.0.xml      # NXP base manifest
@@ -190,12 +203,29 @@ lunch phyboard_polis-userdebug
 
 ## 6. Flashing to MicroSD Card
 
-Identify your SD card device (e.g. `/dev/sdX` via `lsblk`). When writing complete partition images built under `out/target/product/phyboard_polis/`:
+### Option A: One-Click Automated SD Card Flashing (Recommended)
+
+Prebuilt images and automated partitioning scripts are provided directly in the [`images/`](images/) directory:
+
+```bash
+cd images
+
+# Flashing syntax: sudo ./flash.sh [device_node]
+# Default target device is /dev/sdc:
+sudo ./flash.sh /dev/sdX
+```
+This automatically partitions the MicroSD card with the verified GPT table, erases the metadata/userdata partitions, and flashes all partitions (`u-boot-imx8mm.imx`, `dtbo-imx8mm.img`, `boot.img`, `init_boot.img`, `vendor_boot.img`, `super.img`, `vbmeta-imx8mm.img`).
+
+---
+
+### Option B: Manual Partition Flashing
+
+Identify your SD card device (e.g. `/dev/sdX` via `lsblk`). When writing complete partition images manually:
 
 ### 1. Flash Bootloader (U-Boot SPL + Proper)
 ```bash
-# Flash U-Boot (flash.bin) with 33 KiB offset
-sudo dd if=out/target/product/phyboard_polis/flash.bin of=/dev/sdX bs=1024 seek=33 conv=fsync
+# Flash U-Boot (flash.bin or u-boot-imx8mm.imx) with 33 KiB offset
+sudo dd if=images/u-boot-imx8mm.imx of=/dev/sdX bs=1024 seek=33 conv=fsync
 ```
 
 ### 2. Standard Android Partition Layout (GPT)
