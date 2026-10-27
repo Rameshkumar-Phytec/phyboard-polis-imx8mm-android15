@@ -93,6 +93,9 @@
 │   │   └── 0001-dexpreopt_gen-Support-absolute-product_packages-path.patch
 │   └── build_make_patches/     # 1 Lunch shortcut configuration
 │       └── 0001-envsetup-Support-simplified-lunch-combo-phyboard_pol.patch
+├── Assets/
+│   ├── Polis_board_IMX8MM_1Android_image.jpeg  # Hardware photo: Android 15 UI on PEB-AV-10 LVDS
+│   └── Polis_board_IMX8MM_2Android_image.jpeg  # Hardware photo: phyBOARD-Polis i.MX8MM test bench setup
 ├── configs/
 │   ├── imx8mm_phycore_android_defconfig  # U-Boot Android 15 defconfig
 │   └── phycore_imx8mm.env                # Clean, industrial U-Boot autoboot environment
@@ -254,6 +257,12 @@ phyboard_polis:/ # i2cdetect -y 0
 
 phyboard_polis:/ # echo 6 > /sys/class/backlight/backlight/brightness
 ```
+
+### Hardware Verification Gallery
+
+| Android 15 Desktop on PEB-AV-10 LVDS Display | phyBOARD-Polis i.MX8MM Test Bench Setup |
+| :---: | :---: |
+| <img src="Assets/Polis_board_IMX8MM_1Android_image.jpeg" width="360" alt="Android 15 UI running on PEB-AV-10 LVDS Display"> | <img src="Assets/Polis_board_IMX8MM_2Android_image.jpeg" width="480" alt="phyBOARD-Polis i.MX8MM Hardware Bench Setup"> |
 
 ---
 
