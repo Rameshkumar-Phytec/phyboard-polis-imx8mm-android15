@@ -1,7 +1,7 @@
 From 4bd749e88b38b1f18e2374948ea43d1f6e4bc1a2 Mon Sep 17 00:00:00 2001
 From: T S Rameshkumar <rameshkumar.t@phytecembedded.in>
 Date: Fri, 9 Oct 2026 18:42:03 +0530
-Subject: [PATCH 02/16] imx8m: phyboard_polis: Add kernel build rules and
+Subject: [PATCH 02/17] imx8m: phyboard_polis: Add kernel build rules and
  Android defconfig addition
 
 Add android_addition_defconfig and update kernel build rules for phyBOARD-Polis i.MX8MM.

@@ -1,7 +1,7 @@
 From 84e19926a6374effb1bd818f5ebc19dbb5e07c27 Mon Sep 17 00:00:00 2001
 From: T S Rameshkumar <rameshkumar.t@phytecembedded.in>
 Date: Tue, 13 Oct 2026 17:59:51 +0530
-Subject: [PATCH 5/8] arm64: dts: freescale: Add PHYTEC phyBOARD-Polis carrier
+Subject: [PATCH 5/9] arm64: dts: freescale: Add PHYTEC phyBOARD-Polis carrier
  board and peripheral overlays
 
 Add device tree source for PHYTEC phyBOARD-Polis i.MX8MM RDK carrier board

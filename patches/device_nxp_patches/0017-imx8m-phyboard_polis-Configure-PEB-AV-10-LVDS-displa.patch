@@ -1,0 +1,77 @@
+From c42485ea50e4299951a737e1bc7b0d8b866456e3 Mon Sep 17 00:00:00 2001
+From: T S Rameshkumar <rameshkumar.t@phytecembedded.in>
+Date: Tue, 27 Oct 2026 10:14:11 +0530
+Subject: [PATCH 17/17] imx8m: phyboard_polis: Configure PEB-AV-10 LVDS display
+ and peripheral drivers
+
+1. BoardConfig.mk:
+   - Configure imx8mm:imx8mm-phyboard-polis-peb-av-10.dtb as default primary
+     display configuration in TARGET_BOARD_DTS_CONFIG so U-Boot automatically
+     boots Android with PEB-AV-10 LVDS display enabled.
+   - Retain imx8mm-phyboard-polis-rdk.dtb as headless configuration option.
+
+2. SharedBoardConfig.mk:
+   - Package snd-soc-tlv320aic3x.ko, snd-soc-tlv320aic3x-i2c.ko, and at24.ko
+     into BOARD_VENDOR_KERNEL_MODULES for depmod vendor packaging.
+
+3. android_addition_defconfig:
+   - Enable CONFIG_DRM_TI_SN65DSI83=y, CONFIG_DRM_PANEL_SIMPLE=y,
+     CONFIG_BACKLIGHT_PWM=y, CONFIG_PWM_IMX27=y for built-in LVDS display.
+   - Enable CONFIG_SND_SOC_TLV320AIC3X_I2C=m and CONFIG_EEPROM_AT24=m.
+
+Signed-off-by: T S Rameshkumar <rameshkumar.t@phytecembedded.in>
+---
+ imx8m/phyboard_polis/BoardConfig.mk             | 7 ++++---
+ imx8m/phyboard_polis/SharedBoardConfig.mk       | 3 +++
+ imx8m/phyboard_polis/android_addition_defconfig | 6 ++++++
+ 3 files changed, 13 insertions(+), 3 deletions(-)
+
+diff --git a/imx8m/phyboard_polis/BoardConfig.mk b/imx8m/phyboard_polis/BoardConfig.mk
+index 527222e6..f1d9b7ec 100644
+--- a/imx8m/phyboard_polis/BoardConfig.mk
++++ b/imx8m/phyboard_polis/BoardConfig.mk
+@@ -164,9 +164,10 @@ ifeq ($(TARGET_USE_DYNAMIC_PARTITIONS),true)
+   ifeq ($(IMX_NO_PRODUCT_PARTITION),true)
+     TARGET_BOARD_DTS_CONFIG ?= imx8mm:imx8mm-phyboard-polis-rdk-no-product.dtb
+   else
+-    TARGET_BOARD_DTS_CONFIG ?= imx8mm:imx8mm-phyboard-polis-rdk.dtb
+-    # imx8mm with PEB-AV-10 LVDS panel display (TI SN65DSI83)
+-    TARGET_BOARD_DTS_CONFIG += imx8mm-lvds:imx8mm-phyboard-polis-peb-av-10.dtb
++    # Entry 0: PEB-AV-10 LVDS Display (TI SN65DSI83)
++    TARGET_BOARD_DTS_CONFIG := imx8mm:imx8mm-phyboard-polis-peb-av-10.dtb
++    # Entry 1: Default headless board
++    TARGET_BOARD_DTS_CONFIG += imx8mm-headless:imx8mm-phyboard-polis-rdk.dtb
+   endif
+ else
+   ifeq ($(IMX_NO_PRODUCT_PARTITION),true)
+diff --git a/imx8m/phyboard_polis/SharedBoardConfig.mk b/imx8m/phyboard_polis/SharedBoardConfig.mk
+index f1043839..aec667fd 100644
+--- a/imx8m/phyboard_polis/SharedBoardConfig.mk
++++ b/imx8m/phyboard_polis/SharedBoardConfig.mk
+@@ -72,6 +72,9 @@ BOARD_VENDOR_KERNEL_MODULES += \
+     $(KERNEL_OUT)/drivers/net/phy/dp83867.ko \
+     $(KERNEL_OUT)/drivers/pps/pps_core.ko \
+     $(KERNEL_OUT)/drivers/ptp/ptp.ko \
++    $(KERNEL_OUT)/sound/soc/codecs/snd-soc-tlv320aic3x.ko \
++    $(KERNEL_OUT)/sound/soc/codecs/snd-soc-tlv320aic3x-i2c.ko \
++    $(KERNEL_OUT)/drivers/misc/eeprom/at24.ko \
+     $(KERNEL_OUT)/drivers/net/ethernet/freescale/fec.ko
+ endif
+ 
+diff --git a/imx8m/phyboard_polis/android_addition_defconfig b/imx8m/phyboard_polis/android_addition_defconfig
+index 6133f796..34296f8c 100644
+--- a/imx8m/phyboard_polis/android_addition_defconfig
++++ b/imx8m/phyboard_polis/android_addition_defconfig
+@@ -4,3 +4,9 @@ CONFIG_DP83867_PHY=m
+ CONFIG_RTC_DRV_RV3028=m
+ CONFIG_LOCALVERSION="-g758ad1ac4e8e-PHYTEC-Android15"
+ # CONFIG_LOCALVERSION_AUTO is not set
++CONFIG_DRM_TI_SN65DSI83=y
++CONFIG_DRM_PANEL_SIMPLE=y
++CONFIG_BACKLIGHT_PWM=y
++CONFIG_PWM_IMX27=y
++CONFIG_SND_SOC_TLV320AIC3X_I2C=m
++CONFIG_EEPROM_AT24=m
+-- 
+2.34.1
+

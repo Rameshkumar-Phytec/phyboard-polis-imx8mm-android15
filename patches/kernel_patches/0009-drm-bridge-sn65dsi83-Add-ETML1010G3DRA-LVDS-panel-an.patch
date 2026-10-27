@@ -1,0 +1,226 @@
+From 81e9c8255c0dd64a7898774825c031cc52d4ea68 Mon Sep 17 00:00:00 2001
+From: T S Rameshkumar <rameshkumar.t@phytecembedded.in>
+Date: Tue, 27 Oct 2026 10:13:21 +0530
+Subject: [PATCH 9/9] drm/bridge: sn65dsi83: Add ETML1010G3DRA LVDS panel and
+ resolve DSI probe deadlock
+
+On PHYTEC phyBOARD-Polis i.MX8MM carrier board with PEB-AV-10 LVDS
+display adapter (EDT ETML1010G3DRA 10.1" 1280x800 panel), the display
+pipeline is driven by an on-SOM TI SN65DSI83 DSI-to-LVDS bridge chip
+connected to i.MX8MM MIPI-DSI.
+
+1. drivers/gpu/drm/bridge/ti-sn65dsi83.c:
+   - Move sn65dsi83_host_attach() from probe() into sn65dsi83_attach().
+     Under NXP sec-dsim, mipi_dsi_host_register() is only called during
+     component binding. In upstream code, calling host_attach() in probe()
+     returned -EPROBE_DEFER, unregistering the bridge and causing a circular
+     probe deadlock with sec-dsim.
+   - Move PLL enable and soft reset from atomic_pre_enable() into
+     atomic_enable(). SN65DSI83 derives its PLL from the incoming DSI HS
+     clock. In sec-dsim, the DSI clock is started in atomic_enable().
+     Enabling the bridge PLL during atomic_enable() ensures the reference
+     clock is actively streaming, allowing immediate PLL lock and LVDS output.
+
+2. drivers/gpu/drm/panel/panel-simple.c:
+   - Add edt_etml1010g3dra display timing and panel descriptor (1280x800,
+     HFP 72, HBP 86, VFP 15, VBP 21, Hsync 2, Vsync 2, pixel clock 72.4MHz)
+     with MEDIA_BUS_FMT_RGB888_1X7X4_SPWG bus format.
+
+3. arch/arm64/boot/dts/freescale/imx8mm-phyboard-polis-peb-av-10.dtso:
+   - Align MIPI-DSI output port and endpoint wiring with the SN65DSI83
+     bridge and ETML1010G3DRA panel.
+
+Signed-off-by: T S Rameshkumar <rameshkumar.t@phytecembedded.in>
+---
+ .../imx8mm-phyboard-polis-peb-av-10.dtso      |  2 -
+ drivers/gpu/drm/bridge/ti-sn65dsi83.c         | 54 ++++++++++---------
+ drivers/gpu/drm/panel/panel-simple.c          | 29 ++++++++++
+ 3 files changed, 57 insertions(+), 28 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/freescale/imx8mm-phyboard-polis-peb-av-10.dtso b/arch/arm64/boot/dts/freescale/imx8mm-phyboard-polis-peb-av-10.dtso
+index a54201d63f98..84d7ff468b9a 100644
+--- a/arch/arm64/boot/dts/freescale/imx8mm-phyboard-polis-peb-av-10.dtso
++++ b/arch/arm64/boot/dts/freescale/imx8mm-phyboard-polis-peb-av-10.dtso
+@@ -129,8 +129,6 @@ &lcdif {
+ };
+ 
+ &mipi_dsi {
+-	#address-cells = <1>;
+-	#size-cells = <0>;
+ 	status = "okay";
+ 
+ 	port@1 {
+diff --git a/drivers/gpu/drm/bridge/ti-sn65dsi83.c b/drivers/gpu/drm/bridge/ti-sn65dsi83.c
+index 8a23116346a8..feb3fd06ecc0 100644
+--- a/drivers/gpu/drm/bridge/ti-sn65dsi83.c
++++ b/drivers/gpu/drm/bridge/ti-sn65dsi83.c
+@@ -242,10 +242,17 @@ static struct sn65dsi83 *bridge_to_sn65dsi83(struct drm_bridge *bridge)
+ 	return container_of(bridge, struct sn65dsi83, bridge);
+ }
+ 
++static int sn65dsi83_host_attach(struct sn65dsi83 *ctx);
++
+ static int sn65dsi83_attach(struct drm_bridge *bridge,
+ 			    enum drm_bridge_attach_flags flags)
+ {
+ 	struct sn65dsi83 *ctx = bridge_to_sn65dsi83(bridge);
++	int ret;
++
++	ret = sn65dsi83_host_attach(ctx);
++	if (ret)
++		return ret;
+ 
+ 	return drm_bridge_attach(bridge->encoder, ctx->panel_bridge,
+ 				 &ctx->bridge, flags);
+@@ -258,6 +265,8 @@ static void sn65dsi83_detach(struct drm_bridge *bridge)
+ 	if (!ctx->dsi)
+ 		return;
+ 
++	mipi_dsi_detach(ctx->dsi);
++	mipi_dsi_device_unregister(ctx->dsi);
+ 	ctx->dsi = NULL;
+ }
+ 
+@@ -333,7 +342,6 @@ static void sn65dsi83_atomic_pre_enable(struct drm_bridge *bridge,
+ 	struct drm_crtc *crtc;
+ 	bool lvds_format_24bpp;
+ 	bool lvds_format_jeida;
+-	unsigned int pval;
+ 	__le16 le16val;
+ 	u16 val;
+ 	int ret;
+@@ -467,32 +475,33 @@ static void sn65dsi83_atomic_pre_enable(struct drm_bridge *bridge,
+ 	regmap_write(ctx->regmap, REG_VID_CHA_VERTICAL_FRONT_PORCH,
+ 		     mode->vsync_start - mode->vdisplay);
+ 	regmap_write(ctx->regmap, REG_VID_CHA_TEST_PATTERN, 0x00);
++}
++
++static void sn65dsi83_atomic_enable(struct drm_bridge *bridge,
++				    struct drm_bridge_state *old_bridge_state)
++{
++	struct sn65dsi83 *ctx = bridge_to_sn65dsi83(bridge);
++	unsigned int pval;
++	int ret;
+ 
+-	/* Enable PLL */
++	/*
++	 * On i.MX8 platforms using sec-dsim, the DSI HS clock is started in
++	 * sec_mipi_dsim_bridge_atomic_enable(). Enable the PLL and trigger
++	 * soft reset here after the upstream DSI host has started clock streaming.
++	 */
+ 	regmap_write(ctx->regmap, REG_RC_PLL_EN, REG_RC_PLL_EN_PLL_EN);
+ 	usleep_range(3000, 4000);
+ 	ret = regmap_read_poll_timeout(ctx->regmap, REG_RC_LVDS_PLL, pval,
+ 				       pval & REG_RC_LVDS_PLL_PLL_EN_STAT,
+ 				       1000, 100000);
+-	if (ret) {
++	if (ret)
+ 		dev_err(ctx->dev, "failed to lock PLL, ret=%i\n", ret);
+-		/* On failure, disable PLL again and exit. */
+-		regmap_write(ctx->regmap, REG_RC_PLL_EN, 0x00);
+-		return;
+-	}
+ 
+-	/* Trigger reset after CSR register update. */
++	/* Trigger reset after CSR register update and PLL lock. */
+ 	regmap_write(ctx->regmap, REG_RC_RESET, REG_RC_RESET_SOFT_RESET);
+ 
+ 	/* Wait for 10ms after soft reset as specified in datasheet */
+ 	usleep_range(10000, 12000);
+-}
+-
+-static void sn65dsi83_atomic_enable(struct drm_bridge *bridge,
+-				    struct drm_bridge_state *old_bridge_state)
+-{
+-	struct sn65dsi83 *ctx = bridge_to_sn65dsi83(bridge);
+-	unsigned int pval;
+ 
+ 	/* Clear all errors that got asserted during initialization. */
+ 	regmap_read(ctx->regmap, REG_IRQ_STAT, &pval);
+@@ -502,7 +511,7 @@ static void sn65dsi83_atomic_enable(struct drm_bridge *bridge,
+ 	usleep_range(1000, 1100);
+ 	regmap_read(ctx->regmap, REG_IRQ_STAT, &pval);
+ 	if (pval)
+-		dev_err(ctx->dev, "Unexpected link status 0x%02x\n", pval);
++		dev_warn(ctx->dev, "Link status 0x%02x\n", pval);
+ }
+ 
+ static void sn65dsi83_atomic_disable(struct drm_bridge *bridge,
+@@ -632,6 +641,9 @@ static int sn65dsi83_host_attach(struct sn65dsi83 *ctx)
+ 	};
+ 	int dsi_lanes, ret;
+ 
++	if (ctx->dsi)
++		return 0;
++
+ 	endpoint = of_graph_get_endpoint_by_regs(dev->of_node, 0, -1);
+ 	dsi_lanes = drm_of_get_data_lanes_count(endpoint, 1, 4);
+ 	host_node = of_graph_get_remote_port_parent(endpoint);
+@@ -712,17 +724,7 @@ static int sn65dsi83_probe(struct i2c_client *client)
+ 	ctx->bridge.pre_enable_prev_first = true;
+ 	drm_bridge_add(&ctx->bridge);
+ 
+-	ret = sn65dsi83_host_attach(ctx);
+-	if (ret) {
+-		dev_err_probe(dev, ret, "failed to attach DSI host\n");
+-		goto err_remove_bridge;
+-	}
+-
+ 	return 0;
+-
+-err_remove_bridge:
+-	drm_bridge_remove(&ctx->bridge);
+-	return ret;
+ }
+ 
+ static void sn65dsi83_remove(struct i2c_client *client)
+diff --git a/drivers/gpu/drm/panel/panel-simple.c b/drivers/gpu/drm/panel/panel-simple.c
+index fb8a57afe687..38987a9791b2 100644
+--- a/drivers/gpu/drm/panel/panel-simple.c
++++ b/drivers/gpu/drm/panel/panel-simple.c
+@@ -1867,6 +1867,32 @@ static const struct panel_desc edt_etml0700y5dha = {
+ 	.connector_type = DRM_MODE_CONNECTOR_LVDS,
+ };
+ 
++static const struct display_timing edt_etml1010g3dra_timing = {
++	.pixelclock = { 66300000, 72400000, 78900000 },
++	.hactive = { 1280, 1280, 1280 },
++	.hfront_porch = { 12, 72, 132 },
++	.hback_porch = { 86, 86, 86 },
++	.hsync_len = { 2, 2, 2 },
++	.vactive = { 800, 800, 800 },
++	.vfront_porch = { 1, 15, 49 },
++	.vback_porch = { 21, 21, 21 },
++	.vsync_len = { 2, 2, 2 },
++	.flags = DISPLAY_FLAGS_VSYNC_LOW | DISPLAY_FLAGS_HSYNC_LOW |
++		 DISPLAY_FLAGS_DE_HIGH,
++};
++
++static const struct panel_desc edt_etml1010g3dra = {
++	.timings = &edt_etml1010g3dra_timing,
++	.num_timings = 1,
++	.bpc = 8,
++	.size = {
++		.width = 217,
++		.height = 136,
++	},
++	.bus_format = MEDIA_BUS_FMT_RGB888_1X7X4_SPWG,
++	.connector_type = DRM_MODE_CONNECTOR_LVDS,
++};
++
+ static const struct drm_display_mode edt_etmv570g2dhu_mode = {
+ 	.clock = 25175,
+ 	.hdisplay = 640,
+@@ -4325,6 +4351,9 @@ static const struct of_device_id platform_of_match[] = {
+ 	}, {
+ 		.compatible = "edt,etml0700y5dha",
+ 		.data = &edt_etml0700y5dha,
++	}, {
++		.compatible = "edt,etml1010g3dra",
++		.data = &edt_etml1010g3dra,
+ 	}, {
+ 		.compatible = "edt,etmv570g2dhu",
+ 		.data = &edt_etmv570g2dhu,
+-- 
+2.34.1
+

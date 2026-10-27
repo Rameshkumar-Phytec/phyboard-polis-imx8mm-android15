@@ -1,8 +1,8 @@
 From fc88f2d847e1532ad86face27db3e8a168e2446d Mon Sep 17 00:00:00 2001
 From: T S Rameshkumar <rameshkumar.t@phytecembedded.in>
 Date: Mon, 26 Oct 2026 10:39:12 +0530
-Subject: [PATCH] configs: phycore_imx8mm_android: Configure 800M CMA pool in
- default boot environment
+Subject: [PATCH 7/7] configs: phycore_imx8mm_android: Configure 800M CMA pool
+ in default boot environment
 
 Append cma=800M@0x400M-0xb80M to append_bootargs and bootargs in
 CFG_EXTRA_ENV_SETTINGS so the Linux kernel reserves an 800MB contiguous

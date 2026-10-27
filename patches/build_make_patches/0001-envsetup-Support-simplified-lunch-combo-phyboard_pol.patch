@@ -1,0 +1,51 @@
+From ce667fe7bd87f6e91d1938420bb2d2f914172708 Mon Sep 17 00:00:00 2001
+From: T S Rameshkumar <rameshkumar.t@phytecembedded.in>
+Date: Tue, 27 Oct 2026 15:28:52 +0530
+Subject: [PATCH] envsetup: Support simplified lunch combo
+ phyboard_polis-userdebug
+
+Support the simplified lunch target format 'phyboard_polis-userdebug'
+by automatically mapping it to nxp_stable release config, matching
+the PHYTEC BoardConfig environment.
+
+Change-Id: I043cb631c87a794d1569ea1506af175c961921a6
+Signed-off-by: T S Rameshkumar <rameshkumar.t@phytecembedded.in>
+---
+ envsetup.sh | 21 +++++++++++++++++++++
+ 1 file changed, 21 insertions(+)
+
+diff --git a/envsetup.sh b/envsetup.sh
+index 06dadd3f38..d58ea17245 100644
+--- a/envsetup.sh
++++ b/envsetup.sh
+@@ -489,6 +489,27 @@ function lunch()
+     # Split string on the '-' character.
+     IFS="-" read -r product release variant <<< "$selection"
+ 
++    # Block the 3-part NXP-style name for phyboard_polis
++    local variant_clean="${variant//[$'\t\r\n ']/}"
++    local release_clean="${release//[$'\t\r\n ']/}"
++    if [[ "$product" == "phyboard_polis" ]] && [[ "$release_clean" == "nxp_stable" ]] && [[ -n "$variant_clean" ]]; then
++        echo
++        echo "Invalid lunch combo: $selection"
++        echo "For phyboard_polis, please use: phyboard_polis-user or phyboard_polis-userdebug"
++        return 1
++    fi
++
++    # Support simplified format: <product>-<variant>
++    # Trim any trailing carriage returns or whitespace
++    if [[ -z "$variant" ]] && [[ "$release_clean" =~ ^(user|userdebug|eng)$ ]]; then
++        variant="$release_clean"
++        if [[ "$product" == "phyboard_polis" ]] || [[ "$product" =~ ^evk_8m ]]; then
++            release="nxp_stable"
++        else
++            release="trunk_staging"
++        fi
++    fi
++
+     if [[ -z "$product" ]] || [[ -z "$release" ]] || [[ -z "$variant" ]]
+     then
+         echo
+-- 
+2.34.1
+

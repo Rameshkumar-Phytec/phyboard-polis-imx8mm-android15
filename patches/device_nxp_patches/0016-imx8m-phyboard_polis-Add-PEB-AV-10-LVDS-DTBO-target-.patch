@@ -1,7 +1,7 @@
 From f571302e92513fd61507065ad2e997f9ee4d2280 Mon Sep 17 00:00:00 2001
 From: T S Rameshkumar <rameshkumar.t@phytecembedded.in>
 Date: Mon, 26 Oct 2026 10:57:41 +0530
-Subject: [PATCH 16/16] imx8m: phyboard_polis: Add PEB-AV-10 LVDS DTBO target
+Subject: [PATCH 16/17] imx8m: phyboard_polis: Add PEB-AV-10 LVDS DTBO target
  to TARGET_BOARD_DTS_CONFIG
 
 Register imx8mm-lvds:imx8mm-phyboard-polis-peb-av-10.dtb in TARGET_BOARD_DTS_CONFIG

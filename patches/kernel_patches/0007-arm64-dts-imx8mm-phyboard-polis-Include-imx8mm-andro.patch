@@ -1,7 +1,7 @@
 From 662e5de66a3e26f74133880a22f7613bb2a27fa7 Mon Sep 17 00:00:00 2001
 From: T S Rameshkumar <rameshkumar.t@phytecembedded.in>
 Date: Thu, 15 Oct 2026 10:40:41 +0530
-Subject: [PATCH 7/8] arm64: dts: imx8mm-phyboard-polis: Include
+Subject: [PATCH 7/9] arm64: dts: imx8mm-phyboard-polis: Include
  imx8mm-android.dtsi for Android 15 boot
 
 Include imx8mm-android.dtsi in the phyBOARD-Polis device tree to define

@@ -53,27 +53,46 @@
 .
 ├── phytec_phyboard_polis_android_setup.sh     # Industrial 1-click BSP setup & patch automation script
 ├── patches/
-│   ├── uboot_patches/          # 5 Production-grade atomic commits for U-Boot 2024.04
+│   ├── uboot_patches/          # 7 Production-grade atomic commits for U-Boot 2024.04
 │   │   ├── 0001-board-phytec-phycore_imx8mm-Add-2GB-LPDDR4-timings-a.patch
 │   │   ├── 0002-configs-phycore-imx8mm-Add-Android-15-defconfigs-and.patch
 │   │   ├── 0003-imx8mm-phyboard-polis-Map-SD2_BOOT-to-MMC2-and-annot.patch
 │   │   ├── 0004-clk-imx8mm-Preserve-clock-provider-phandles-in-SPL-D.patch
-│   │   └── 0005-board-phytec-phycore_imx8mm-Add-industrial-auto-boot.patch
-│   ├── kernel_patches/         # 6 Production-grade subsystem commits for Linux Kernel 6.6.58
+│   │   ├── 0005-board-phytec-phycore_imx8mm-Add-industrial-auto-boot.patch
+│   │   ├── 0006-board-phytec-phycore_imx8mm-Enable-native-boota-comm.patch
+│   │   └── 0007-configs-phycore_imx8mm_android-Configure-800M-CMA-po.patch
+│   ├── kernel_patches/         # 9 Production-grade subsystem commits for Linux Kernel 6.6.58
 │   │   ├── 0001-pinctrl-scmi-Add-support-for-OEM-and-generic-pinconf.patch
 │   │   ├── 0002-drivers-imx-Adapt-network-pfe-and-uio-drivers-for-An.patch
 │   │   ├── 0003-arm64-configs-Add-PHYTEC-imx8-and-imx9-kernel-config.patch
 │   │   ├── 0004-arm64-dts-freescale-Add-PHYTEC-phyCORE-i.MX8MM-SOM-s.patch
 │   │   ├── 0005-arm64-dts-freescale-Add-PHYTEC-phyBOARD-Polis-carrie.patch
-│   │   └── 0006-arm64-dts-freescale-Add-PHYTEC-phyGATE-Tauri-L-devic.patch
-│   └── device_nxp_patches/     # 7 Production-grade build & HAL commits for device/nxp
-│       ├── 0001-imx8m-phyboard_polis-Add-target-build-makefiles-and-.patch
-│       ├── 0002-imx8m-phyboard_polis-Add-kernel-build-rules-and-Andr.patch
-│       ├── 0003-imx8m-phyboard_polis-Add-init-rc-scripts-fstab-and-u.patch
-│       ├── 0004-imx8m-phyboard_polis-Add-audio-camera-thermal-and-po.patch
-│       ├── 0005-imx8m-phyboard_polis-Add-SELinux-policies-seccomp-fi.patch
-│       ├── 0006-imx8m-phyboard_polis-Add-product-properties-and-fram.patch
-│       └── 0007-imx8m-phyboard_polis-Add-standalone-bootimage-dtboim.patch
+│   │   ├── 0006-arm64-dts-freescale-Add-PHYTEC-phyGATE-Tauri-L-devic.patch
+│   │   ├── 0007-arm64-dts-imx8mm-phyboard-polis-Include-imx8mm-andro.patch
+│   │   ├── 0008-clk-imx8mm-Register-UART3-as-critical-clock-and-add-.patch
+│   │   └── 0009-drm-bridge-sn65dsi83-Add-ETML1010G3DRA-LVDS-panel-an.patch
+│   ├── device_nxp_patches/     # 17 Production-grade build & HAL commits for device/nxp
+│   │   ├── 0001-imx8m-phyboard_polis-Add-target-build-makefiles-and-.patch
+│   │   ├── 0002-imx8m-phyboard_polis-Add-kernel-build-rules-and-Andr.patch
+│   │   ├── 0003-imx8m-phyboard_polis-Add-init-rc-scripts-fstab-and-u.patch
+│   │   ├── 0004-imx8m-phyboard_polis-Add-audio-camera-thermal-and-po.patch
+│   │   ├── 0005-imx8m-phyboard_polis-Add-SELinux-policies-seccomp-fi.patch
+│   │   ├── 0006-imx8m-phyboard_polis-Add-product-properties-and-fram.patch
+│   │   ├── 0007-imx8m-phyboard_polis-Add-standalone-bootimage-dtboim.patch
+│   │   ├── 0008-imx8m-phyboard_polis-Prune-built-in-and-inactive-dri.patch
+│   │   ├── 0009-imx8m-phyboard_polis-Add-UART3-earlycon-to-BOARD_KER.patch
+│   │   ├── 0010-imx8m-phyboard_polis-Align-GKI-defconfig-and-disable.patch
+│   │   ├── 0011-imx8m-phyboard_polis-Prune-CONFIG_FEC_UIO-and-enable.patch
+│   │   ├── 0012-imx8m-phyboard_polis-Restore-missing-GKI-vendor-ramd.patch
+│   │   ├── 0013-imx8m-phyboard_polis-Prioritize-pinctrl-and-serial-d.patch
+│   │   ├── 0014-imx8m-phyboard_polis-Enable-PF8x00-PMIC-regulator-mo.patch
+│   │   ├── 0015-imx8m-phyboard_polis-Set-interactive-console-HOSTNAM.patch
+│   │   ├── 0016-imx8m-phyboard_polis-Add-PEB-AV-10-LVDS-DTBO-target-.patch
+│   │   └── 0017-imx8m-phyboard_polis-Configure-PEB-AV-10-LVDS-displa.patch
+│   ├── build_soong_patches/    # 1 Build system fix for out-of-tree artifacts
+│   │   └── 0001-dexpreopt_gen-Support-absolute-product_packages-path.patch
+│   └── build_make_patches/     # 1 Lunch shortcut configuration
+│       └── 0001-envsetup-Support-simplified-lunch-combo-phyboard_pol.patch
 ├── configs/
 │   ├── imx8mm_phycore_android_defconfig  # U-Boot Android 15 defconfig
 │   └── phycore_imx8mm.env                # Clean, industrial U-Boot autoboot environment
@@ -131,7 +150,7 @@ cd phyboard-polis-imx8mm-android15
 ```bash
 # This fetches NXP Android 15.0.0_1.2.0, installs proprietary vendor blobs,
 # auto-configures the cross-toolchain, creates dedicated PHYTEC branches,
-# and applies all 18 patch stacks cleanly.
+# and applies all 35 patch stacks cleanly.
 source ./phytec_phyboard_polis_android_setup.sh
 ```
 
@@ -160,7 +179,7 @@ lunch phyboard_polis-userdebug
 # Or build Bootloader (flash.bin) only
 ./imx-make.sh bootloader -j$(nproc)
 
-# Or build Kernel (Image & DTB) only
+# Or build Kernel (Image, DTBOs) only
 ./imx-make.sh kernel dtboimage -j$(nproc)
 ```
 
@@ -168,14 +187,34 @@ lunch phyboard_polis-userdebug
 
 ## 6. Flashing to MicroSD Card
 
-Identify your SD card device (e.g. `/dev/sdX` via `lsblk`):
+Identify your SD card device (e.g. `/dev/sdX` via `lsblk`). When writing complete partition images built under `out/target/product/phyboard_polis/`:
+
+### 1. Flash Bootloader (U-Boot SPL + Proper)
+```bash
+# Flash U-Boot (flash.bin) with 33 KiB offset
+sudo dd if=out/target/product/phyboard_polis/flash.bin of=/dev/sdX bs=1024 seek=33 conv=fsync
+```
+
+### 2. Standard Android Partition Layout (GPT)
+Flash the individual partition images to their respective GPT partition slots:
+
+| Partition | Target Partition Device | Source Image File | Description |
+| :--- | :--- | :--- | :--- |
+| `dtbo_a` | `/dev/sdX1` | `dtbo-imx8mm.img` | Device Tree Blob Overlay |
+| `boot_a` | `/dev/sdX3` | `boot.img` | Android 15 GKI Kernel (6.6.58) |
+| `init_boot_a` | `/dev/sdX5` | `init_boot.img` | Generic First-Stage Ramdisk |
+| `vendor_boot_a` | `/dev/sdX7` | `vendor_boot.img` | PHYTEC Vendor Ramdisk & DTB |
+| `super` | `/dev/sdX12` | `super.img` | Android System, Vendor, Product, System Ext |
+| `vbmeta_a` | `/dev/sdX15` | `vbmeta-imx8mm.img` | Verified Boot Metadata (AVB) |
 
 ```bash
-# 1. Flash U-Boot (flash.bin) with 33 KiB offset
-sudo dd if=out/target/product/phyboard_polis/flash.bin of=/dev/sdX bs=1024 seek=33 conv=fsync
-
-# 2. Flash Kernel Image to sector 0x8008 (16MB offset)
-sudo dd if=out/target/product/phyboard_polis/Image of=/dev/sdX bs=512 seek=32776 conv=fsync
+# Example flashing script:
+sudo dd if=out/target/product/phyboard_polis/dtbo-imx8mm.img of=/dev/sdX1 bs=4M conv=fsync
+sudo dd if=out/target/product/phyboard_polis/boot.img of=/dev/sdX3 bs=4M conv=fsync
+sudo dd if=out/target/product/phyboard_polis/init_boot.img of=/dev/sdX5 bs=4M conv=fsync
+sudo dd if=out/target/product/phyboard_polis/vendor_boot.img of=/dev/sdX7 bs=4M conv=fsync
+sudo dd if=out/target/product/phyboard_polis/super.img of=/dev/sdX12 bs=4M status=progress conv=fsync
+sudo dd if=out/target/product/phyboard_polis/vbmeta-imx8mm.img of=/dev/sdX15 bs=4M conv=fsync
 ```
 
 Set the boot DIP switches on phyBOARD-Polis for **SD Card Boot**:
@@ -189,94 +228,31 @@ Insert the card, connect UART3 serial console (`115200 8N1`), and power on!
 
 | Subsystem / Layer | Silicon Verification Status | Verification Details |
 | :--- | :--- | :--- |
-| **U-Boot 2024.04 (SPL + Proper)** | 🟢 **Verified on Hardware Silicon** | • Micron 2GB LPDDR4 @ 3000 MT/s initialized<br>• USDHC2 MicroSD boot mapped (MMC2 SPL / MMC1 Proper)<br>• ATF BL31 v2.10.0 loaded at EL3<br>• Zero-touch industrial autoboot from MMC sector `0x8008`<br>• Safe FDT relocation to `0x48000000` |
-| **Linux Kernel 6.6.58 (ARM64 GKI)** | 🟢 **Verified on Hardware Silicon** | • Booted across all 4 Cortex-A53 cores at EL2<br>• GICv3, PSCI 1.1, ROHM BD71847 PMIC probed<br>• 2GB RAM / 640MB CMA allocated<br>• Early & runtime console verified on UART3 (`ttymxc2` @ 115200) |
-| **Android 15 Userspace & HALs** | 🟡 **Ported / Untested on Silicon** | • Board target `phyboard_polis-userdebug` configured<br>• Makefiles, `fstab.nxp`, `init.rc`, and HAL configs created<br>• Full userspace graphics/UI verification currently in progress |
+| **U-Boot 2024.04 (SPL + Proper)** | 🟢 **Verified on Hardware Silicon** | • Micron 2GB LPDDR4 @ 3000 MT/s initialized<br>• USDHC2 MicroSD boot mapped (MMC2 SPL / MMC1 Proper)<br>• ATF BL31 v2.10.0 loaded at EL3<br>• Native `boota` autoboot with AVB slot selection<br>• Safe FDT relocation & 800MB CMA pool configured |
+| **Linux Kernel 6.6.58 (ARM64 GKI)** | 🟢 **Verified on Hardware Silicon** | • Booted across all 4 Cortex-A53 cores at EL2<br>• GICv3, PSCI 1.1, ROHM BD71847 PMIC probed<br>• Gigabit Ethernet (Micrel KSZ9131RNX PHY) active<br>• Runtime console verified on UART3 (`ttymxc2` @ 115200) |
+| **Display & Graphics (PEB-AV-10 LVDS)** | 🟢 **Verified on Hardware Silicon** | • EDT ETML1010G3DRA 10.1" WXGA LVDS display (1280x800)<br>• On-SOM TI SN65DSI83 DSI-to-LVDS bridge chip bound (`0x2d`)<br>• SurfaceFlinger HWC display active (`port=1 displayName="NXP Android"`)<br>• DRM connector `card0-LVDS-1` reported `connected`<br>• PWM4 backlight controllable via sysfs |
+| **Android 15 Userspace & Services** | 🟢 **Verified on Hardware Silicon** | • Android 15.0.0_1.2.0 booted to graphical user desktop<br>• AVB dm-verity active with partition hash integrity<br>• HALs: Graphics Allocator, Mapper, Audio, Health, Thermal online<br>• Interactive root shell configured (`phyboard_polis:/ #`) |
 
-### Verified Hardware Boot Log (UART3 Console)
+### Verified Hardware Display Status & Diagnostics
+
 ```text
-U-Boot SPL 2024.04-PHYTEC-Android+ (Oct 13 2026 - 13:31:24 +0530)
-DDRINFO: start DRAM init
-DDRINFO: DRAM rate 3000MTS
-DDRINFO:ddrphy calibration done
-DDRINFO: ddrmix config done
-Normal Boot
-WDT:   Started watchdog@30280000 with servicing every 1000ms (60s timeout)
-Trying to boot from MMC2
-NOTICE:  Do not release JR0 to NS as it can be used by HAB
-NOTICE:  BL31: v2.10.0  (release):automotive-15.0.0_1.3.0
-NOTICE:  BL31: Built : 13:32:14, Oct 13 2026
+phyboard_polis:/ # dumpsys SurfaceFlinger --display-id
+Display 4628311721810978561 (HWC display 0): port=1 pnpId=NXP displayName="NXP Android"
 
+phyboard_polis:/ # cat /sys/class/drm/card0-LVDS-1/status
+connected
 
-U-Boot 2024.04-PHYTEC-Android+ (Oct 13 2026 - 13:31:24 +0530)
+phyboard_polis:/ # cat /sys/class/drm/card0-LVDS-1/modes
+1280x800
 
-CPU:   i.MX8MMQ rev1.0 1600 MHz (running at 1200 MHz)
-CPU:   Industrial temperature grade (-40C to 105C) at 37C
-Reset cause: POR
-Model: PHYTEC phyBOARD-Polis-i.MX8MM RDK
-DRAM:  2 GiB
-optee optee: OP-TEE api uid mismatch
-board_init: EEPROM data init failed
-Core:  110 devices, 27 uclasses, devicetree: separate
-WDT:   Started watchdog@30280000 with servicing every 1000ms (60s timeout)
-MMC:   FSL_SDHC: 0, FSL_SDHC: 1, FSL_SDHC: 2
-Loading Environment from MMC... *** Warning - bad CRC, using default environment
+phyboard_polis:/ # i2cdetect -y 0
+     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
+00:                         -- -- -- -- -- -- -- -- 
+10: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+20: -- -- -- -- -- -- -- -- -- -- -- -- -- UU -- -- 
+30: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
 
-In:    serial@30880000
-Out:   serial@30880000
-Err:   serial@30880000
-flash target is MMC:1
-Net:   eth0: ethernet@30be0000
-...
-u-boot=> mmc dev 1
-switch to partitions #0, OK
-mmc1 is current device
-u-boot=> mmc read 0x40480000 0x8008 0x10000
-
-MMC read: dev # 1, block # 32776, count 65536 ... 65536 blocks read: OK
-u-boot=> cp.b ${fdtcontroladdr} 0x48000000 0x20000
-u-boot=> setenv bootargs "console=ttymxc2,115200 earlycon init=/init firmware_class.path=/vendor/firmware loop.max_part=7 swiotlb=512 fw_devlink.strict=0"
-u-boot=> booti 0x40480000 - 0x48000000
-   Uncompressing Kernel Image to 0
-Moving Image from 0x40480000 to 0x40600000, end=422e0000
-## Flattened Device Tree blob at 48000000
-   Booting using the fdt blob at 0x48000000
-Working FDT set to 48000000
-   Using Device Tree in place at 0000000048000000, end 000000004801120f
-Working FDT set to 48000000
-No RNG device
-Unable to set property kaslr-seed, err=<unknown error>
-
-Starting kernel ...
-
-[    0.000000] Booting Linux on physical CPU 0x0000000000 [0x410fd034]
-[    0.000000] Linux version 6.6.58-g758ad1ac4e8e-PHYTEC-Android15 (ramesh@ramesh) (Android (11967740, +pgo, +bolt, +lto, +mlgo, based on r522817) clang version 18.0.1
-[    0.000000] KASLR disabled due to lack of seed
-[    0.000000] Machine model: PHYTEC phyBOARD-Polis-i.MX8MM RDK
-[    0.000000] Reserved memory: created CMA memory pool at 0x0000000098000000, size 640 MiB
-[    0.000000] OF: reserved mem: initialized node linux,cma, compatible id shared-dma-pool
-[    0.000000] OF: reserved mem: 0x0000000098000000..0x00000000bfffffff (655360 KiB) map reusable linux,cma
-[    0.000000] earlycon: ec_imx6q0 at MMIO 0x0000000030880000 (options '')
-[    0.000000] printk: bootconsole [ec_imx6q0] enabled
-[    0.000000] psci: probing for conduit method from DT.
-[    0.000000] psci: PSCIv1.1 detected in firmware.
-[    0.000000] psci: Using standard PSCI v0.2 function IDs
-[    0.000000] smp: Bringing up secondary CPUs ...
-[    0.082398] CPU1: Booted secondary processor 0x0000000001 [0x410fd034]
-[    0.083005] CPU2: Booted secondary processor 0x0000000002 [0x410fd034]
-[    0.083526] CPU3: Booted secondary processor 0x0000000003 [0x410fd034]
-[    0.083584] smp: Brought up 1 node, 4 CPUs
-[    0.138440] SMP: Total of 4 processors activated.
-[    0.143154] CPU features: detected: 32-bit EL0 Support
-[    0.148332] CPU features: detected: 32-bit EL1 Support
-[    0.153483] CPU features: detected: CRC32 instructions
-[    0.158711] CPU: All CPU(s) started at EL2
-[    0.212518] pinctrl core: initialized pinctrl subsystem
-[    0.487069] clocksource: Switched to clocksource arch_sys_counter
-[    1.321587] Kernel panic - not syncing: VFS: Unable to mount root fs on unknown-block(0,0)
-[    1.329901] CPU: 1 PID: 1 Comm: swapper/0 Not tainted 6.6.58-g758ad1ac4e8e-PHYTEC-Android15 #1
-[    1.338560] Hardware name: PHYTEC phyBOARD-Polis-i.MX8MM RDK (DT)
-[    1.407339] ---[ end Kernel panic - not syncing: VFS: Unable to mount root fs on unknown-block(0,0) ]---
+phyboard_polis:/ # echo 6 > /sys/class/backlight/backlight/brightness
 ```
 
 ---

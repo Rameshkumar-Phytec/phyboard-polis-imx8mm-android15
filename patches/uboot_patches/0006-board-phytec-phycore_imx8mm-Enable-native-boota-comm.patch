@@ -1,8 +1,8 @@
 From 680f4ed7c6a4957f9d0ad5425e7a959c8c8a8cdd Mon Sep 17 00:00:00 2001
 From: T S Rameshkumar <rameshkumar.t@phytecembedded.in>
 Date: Thu, 15 Oct 2026 10:41:59 +0530
-Subject: [PATCH] board: phytec: phycore_imx8mm: Enable native boota command
- for Android 15 autoboot
+Subject: [PATCH 6/7] board: phytec: phycore_imx8mm: Enable native boota
+ command for Android 15 autoboot
 
 Configure CONFIG_BOOTCOMMAND="boota" and bootdelay=2 across Android defconfigs
 and header files. Pass UART3 earlycon (earlycon=ec_imx6q,0x30880000,115200) via

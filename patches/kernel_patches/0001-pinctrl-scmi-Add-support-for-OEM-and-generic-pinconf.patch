@@ -1,7 +1,7 @@
 From 3dd2db7549f7d10e9c52ae550e8b53f04ef3dca6 Mon Sep 17 00:00:00 2001
 From: T S Rameshkumar <rameshkumar.t@phytecembedded.in>
 Date: Tue, 13 Oct 2026 17:56:39 +0530
-Subject: [PATCH 1/8] pinctrl: scmi: Add support for OEM and generic pinconf
+Subject: [PATCH 1/9] pinctrl: scmi: Add support for OEM and generic pinconf
  mapping
 
 Implement mapping for SCMI pin configuration types including drive

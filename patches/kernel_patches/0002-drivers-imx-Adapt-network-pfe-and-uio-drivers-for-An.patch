@@ -1,7 +1,7 @@
 From d50c06b7c0811d8e5703cd81792194a0330885e9 Mon Sep 17 00:00:00 2001
 From: T S Rameshkumar <rameshkumar.t@phytecembedded.in>
 Date: Tue, 13 Oct 2026 17:56:54 +0530
-Subject: [PATCH 2/8] drivers: imx: Adapt network, pfe, and uio drivers for
+Subject: [PATCH 2/9] drivers: imx: Adapt network, pfe, and uio drivers for
  Android 15 GKI compliance
 
 Add export symbol annotations and CONFIG_IMX_GKI_FIX guards in DPAA2,

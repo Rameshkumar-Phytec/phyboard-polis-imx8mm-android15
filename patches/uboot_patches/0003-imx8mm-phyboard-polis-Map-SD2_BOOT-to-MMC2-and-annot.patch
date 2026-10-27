@@ -1,7 +1,7 @@
 From 62e53f2697948526bbbd8f6ad9e100e0fd53565d Mon Sep 17 00:00:00 2001
 From: T S Rameshkumar <rameshkumar.t@phytecembedded.in>
 Date: Mon, 12 Oct 2026 11:09:08 +0530
-Subject: [PATCH 3/5] imx8mm-phyboard-polis: Map SD2_BOOT to MMC2 and annotate
+Subject: [PATCH 3/7] imx8mm-phyboard-polis: Map SD2_BOOT to MMC2 and annotate
  SPL DT nodes
 
 Map SD2_BOOT to BOOT_DEVICE_MMC2 (usdhc2 SD slot) in SPL and annotate USDHC2, USDHC3, regulator, GPIO, and UART3 console nodes with bootph-pre-ram tags.

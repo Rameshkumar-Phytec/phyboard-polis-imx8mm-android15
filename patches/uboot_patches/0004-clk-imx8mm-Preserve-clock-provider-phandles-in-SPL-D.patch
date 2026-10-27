@@ -1,7 +1,7 @@
 From f4815eb1580d854bc50f135698935116172e42b1 Mon Sep 17 00:00:00 2001
 From: T S Rameshkumar <rameshkumar.t@phytecembedded.in>
 Date: Mon, 12 Oct 2026 11:09:15 +0530
-Subject: [PATCH 4/5] clk: imx8mm: Preserve clock provider phandles in SPL DTB
+Subject: [PATCH 4/7] clk: imx8mm: Preserve clock provider phandles in SPL DTB
  and add CCM fallback
 
 Tag &osc_32k, &clk_ext1..4 with bootph-all and bootph-pre-ram in imx8mm-u-boot.dtsi so fdtgrep preserves clock provider nodes in u-boot-spl.dtb. Add CCM_BASE_ADDR fallback in imx8mm_clk_probe.

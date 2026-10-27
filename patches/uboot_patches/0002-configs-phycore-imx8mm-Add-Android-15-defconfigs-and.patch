@@ -1,7 +1,7 @@
 From 918c08d84655c5e401446b4bb8698a0956a02b65 Mon Sep 17 00:00:00 2001
 From: T S Rameshkumar <rameshkumar.t@phytecembedded.in>
 Date: Mon, 12 Oct 2026 11:08:54 +0530
-Subject: [PATCH 2/5] configs: phycore-imx8mm: Add Android 15 defconfigs and
+Subject: [PATCH 2/7] configs: phycore-imx8mm: Add Android 15 defconfigs and
  configuration headers
 
 Add phycore-imx8mm_android_defconfig and phycore-imx8mm_android_uuu_defconfig with GPT/EFI partitioning, MMC RPMB, CONFIG_SPL_OF_TRANSLATE=y, CONFIG_BOOTSTD_FULL=y, and fastboot environment settings.

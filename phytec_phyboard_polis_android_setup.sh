@@ -261,8 +261,14 @@ apply_patch_stack() {
     fi
 
     if [ "$FORCE_PATCHES" -eq 1 ] || [ "$BRANCH_EXISTS" -eq 0 ]; then
-        echo -e "${BLUE}[INFO] Creating branch '${BRANCH_NAME}' from base '${BASE_TAG}'...${NC}"
-        git checkout -B "$BRANCH_NAME" "$BASE_TAG"
+        local TARGET_BASE="$BASE_TAG"
+        if ! git rev-parse --verify "$TARGET_BASE" >/dev/null 2>&1; then
+            if git rev-parse --verify "m/imx-android-15" >/dev/null 2>&1; then
+                TARGET_BASE="m/imx-android-15"
+            fi
+        fi
+        echo -e "${BLUE}[INFO] Creating branch '${BRANCH_NAME}' from base '${TARGET_BASE}'...${NC}"
+        git checkout -B "$BRANCH_NAME" "$TARGET_BASE"
 
         if [ -d "$PATCH_PATH" ] && [ -n "$(ls -A "$PATCH_PATH"/*.patch 2>/dev/null)" ]; then
             echo -e "${BLUE}[INFO] Applying PHYTEC patch stack from $PATCH_SUBDIR...${NC}"
@@ -307,6 +313,12 @@ if [ -n "$PATCH_DIR" ]; then
         "phytec-android_build_soong-15.0.0_1.2.0" \
         "android-15.0.0_1.2.0" \
         "build_soong_patches"
+
+    apply_patch_stack \
+        "build/make" \
+        "phytec-android_build_make-15.0.0_1.2.0" \
+        "android-15.0.0_r14" \
+        "build_make_patches"
 fi
 
 cd "$android_builddir"

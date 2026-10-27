@@ -1,7 +1,7 @@
 From 9a15a0bfb5622d2ce752bfadf20c752af62b12b8 Mon Sep 17 00:00:00 2001
 From: T S Rameshkumar <rameshkumar.t@phytecembedded.in>
 Date: Mon, 12 Oct 2026 11:08:07 +0530
-Subject: [PATCH 1/5] board: phytec: phycore_imx8mm: Add 2GB LPDDR4 timings and
+Subject: [PATCH 1/7] board: phytec: phycore_imx8mm: Add 2GB LPDDR4 timings and
  board initialization
 
 ---

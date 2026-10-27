@@ -1,7 +1,7 @@
 From 2ab7a30a9513bbe7222674e33d35f6a30d8dda11 Mon Sep 17 00:00:00 2001
 From: T S Rameshkumar <rameshkumar.t@phytecembedded.in>
 Date: Fri, 23 Oct 2026 16:50:10 +0530
-Subject: [PATCH 8/8] clk: imx8mm: Register UART3 as critical clock and add
+Subject: [PATCH 8/9] clk: imx8mm: Register UART3 as critical clock and add
  debug logging
 
 On PHYTEC phyBOARD-Polis i.MX8MM, the serial console is UART3 (0x30880000).
